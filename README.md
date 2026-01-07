@@ -39,7 +39,7 @@ devtools::build()
 ```r
 # Install from GitHub
 # install.packages("devtools")
-devtools::install_github("Plogeur/stoatPlot")
+devtools::install_github("Pa-Tou/stoat_plot")
 ```
 
 > If you are installing locally from source, make sure you have the required dependencies listed in the `DESCRIPTION` file.
@@ -64,7 +64,7 @@ devtools::install_github("Plogeur/stoatPlot")
 ## Example Usage
 
 ```r
-library(stoat_plot)
+library(StoatPlot)
 
 # Manhattan plot 
 plot_manhattan("data/gwas/binary_table_vcf.tsv")
