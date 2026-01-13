@@ -4,14 +4,21 @@
 \alias{genotype_boxplots}
 \title{Genotype boxplots for STOAT GWAS Results}
 \usage{
-genotype_boxplots(phenotype_file, dir_path, output = "output_boxplots")
+genotype_boxplots(
+  genotype_file,
+  phenotype_file,
+  snarl_id,
+  output = "boxplots.jpeg"
+)
 }
 \arguments{
+\item{genotype_file}{Genotype file output of stoat vcf/graph}
+
 \item{phenotype_file}{Path to the phenotype file use for the GWAS analysis.}
 
-\item{dir_path}{Directory containing N-table files with genotype}
+\item{snarl_id}{Snarl ID to plot}
 
-\item{output}{Path to save the output plot image.}
+\item{output}{Path/Name to save the output plot image.}
 }
 \value{
 Saves a genotype boxplots to the specified file.

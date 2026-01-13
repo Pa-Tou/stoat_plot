@@ -1,84 +1,146 @@
 #' Genotype boxplots for STOAT GWAS Results
 #' @description Generates boxplots of phenotype by inferred genotype.
 #'
+#' @param genotype_file Genotype file output of stoat vcf/graph
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
-#' @param dir_path Directory containing N-table files with genotype
-#' @param output Path to save the output plot image.
+#' @param snarl_id Snarl ID to plot
+#' @param output Path/Name to save the output plot image.
 #'
 #' @return Saves a genotype boxplots to the specified file.
 #' @name genotype_boxplots
 #' @export
-genotype_boxplots <- function(phenotype_file, dir_path, output="output_boxplots") {
 
-  pheno_data <- read.table(phenotype_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-  n_table_files <- list.files(path = dir_path, full.names = TRUE)
+genotype_boxplots <- function(genotype_file,
+                              phenotype_file,
+                              snarl_id,
+                              output = "boxplots.jpeg") {
 
-  for (n_table_file in n_table_files) {
-    base_name <- tools::file_path_sans_ext(basename(n_table_file))
+  # -----------------------------
+  # Read phenotype file
+  # -----------------------------
+  pheno_data <- read.table(
+    phenotype_file,
+    header = TRUE,
+    sep = "\t",
+    stringsAsFactors = FALSE
+  )
 
-    # Read genotype table with custom header
-    raw_header <- readLines(n_table_file, n = 1)
-    header_cols <- strsplit(raw_header, "\t")[[1]]
-    n_table <- read.table(n_table_file, header = FALSE, sep = "\t", skip = 1, stringsAsFactors = FALSE)
-    colnames(n_table) <- header_cols
-    colnames(n_table)[1] <- "IID"
+  stopifnot(all(c("IID", "PHENO") %in% colnames(pheno_data)))
 
-    # Merge genotype with phenotype
-    merged_data <- dplyr::left_join(n_table, pheno_data, by = "IID")
+  # -----------------------------
+  # Read STOAT genotype table
+  # -----------------------------
+  all_lines <- readLines(genotype_file)
 
-    genotype_columns <- setdiff(colnames(merged_data), c("IID", "PHENO"))
+  print(all_lines)
 
-    # Inferred genotype from probabilities
-    classify_genotype <- function(row) {
-      probs <- suppressWarnings(as.numeric(row[genotype_columns]))
-      if (all(is.na(probs))) return(NA)
+  # Find header line (WITH #)
+  header_idx <- grep("^#START_NODE", all_lines)
 
-      top_indices <- order(probs, decreasing = TRUE)[1:2]
-      top_vals <- probs[top_indices]
-
-      # Homozygous call: one allele has high probability
-      if (!is.na(top_vals[1]) && top_vals[1] >= 0.95) {
-        allele <- genotype_columns[top_indices[1]]
-        return(paste0(allele, "/", allele))
-      }
-
-      # Heterozygous call: two alleles have balanced probabilities
-      if (!is.na(top_vals[1]) && !is.na(top_vals[2]) &&
-          top_vals[1] >= 0.4 && top_vals[2] >= 0.4) {
-        allele1 <- genotype_columns[top_indices[1]]
-        allele2 <- genotype_columns[top_indices[2]]
-        return(paste0(allele1, "/", allele2))
-      }
-
-      return(NA)  # ambiguous case
-    }
-
-    merged_data$Genotype <- apply(merged_data, 1, classify_genotype)
-    merged_data <- merged_data[!is.na(merged_data$PHENO) & !is.na(merged_data$Genotype), ]
-
-    # Count genotypes
-    genotype_counts <- dplyr::group_by(merged_data, Genotype) %>%
-      dplyr::summarise(count = dplyr::n(), .groups = "drop")
-
-    # Append count to genotype label
-    merged_data <- dplyr::left_join(merged_data, genotype_counts, by = "Genotype") %>%
-      dplyr::mutate(Genotype = paste0(gsub("/", "\n", Genotype), "\n(", count, ")"))
-
-    # Plot
-    p <- ggplot2::ggplot(merged_data, ggplot2::aes(x = Genotype, y = PHENO)) +
-      ggplot2::geom_violin(fill = "cadetblue3", alpha = 0.3) +
-      ggplot2::geom_boxplot(width = 0.2, outlier.size = 2, outlier.colour = "red", alpha = 0.5, fill = "darkcyan") +
-      ggplot2::labs(x = "Genotype", y = "Phenotype", title = paste("Boxplot -", base_name)) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(
-        axis.title.x = ggplot2::element_text(size = 14, color = "cadetblue4"),
-        axis.title.y = ggplot2::element_text(size = 14, color = "cadetblue4"),
-        plot.title = ggplot2::element_text(size = 16, color = "cadetblue4", face = "bold", hjust = 0.5)
-      )
-
-    # Save
-    output_file <- file.path(output, paste0(base_name, "_boxplot.jpeg"))
-    ggplot2::ggsave(output_file, plot = p, device = "jpeg", width = 8, height = 6, dpi = 300)
-    message("Saved plot for ", base_name, " as ", output_file)
+  if (length(header_idx) == 0) {
+    stop("START_NODE header not found in genotype file")
   }
+
+  # Remove leading '#'
+  header_line <- sub("^#", "", all_lines[header_idx])
+  header_cols <- strsplit(header_line, "\t")[[1]]
+
+  # Read data starting AFTER the header line
+  geno_data <- read.table(
+    genotype_file,
+    header = FALSE,
+    sep = "\t",
+    skip = header_idx,
+    stringsAsFactors = FALSE
+  )
+
+  colnames(geno_data) <- header_cols
+
+  # -----------------------------
+  # Create snarl ID (NO SEPARATOR)
+  # -----------------------------
+  geno_data <- geno_data %>%
+    mutate(
+      SNARL_ID = paste0(START_NODE, END_NODE)
+    )
+
+  # Filter selected snarl
+  geno_data <- geno_data %>%
+    filter(SNARL_ID == snarl_id)
+
+  if (nrow(geno_data) == 0) {
+    stop("snarl_id not found in genotype file")
+  }
+
+  # -----------------------------
+  # Identify genotype columns
+  # -----------------------------
+  fixed_cols <- c(
+    "START_NODE", "END_NODE", "REF", "START_OFFSET", "END_OFFSET",
+    "DEPTH", "ALLELE_LENGTHS", "WALKS", "SEQUENCES", "SNARL_ID"
+  )
+
+  genotype_columns <- setdiff(colnames(geno_data), fixed_cols)
+
+  # -----------------------------
+  # Convert to sample-long format
+  # -----------------------------
+  geno_long <- geno_data %>%
+    select(all_of(genotype_columns)) %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = "IID",
+      values_to = "GT"
+    )
+
+  # -----------------------------
+  # Merge with phenotype
+  # -----------------------------
+  merged_data <- left_join(geno_long, pheno_data, by = "IID") %>%
+    filter(!is.na(PHENO))
+
+  # -----------------------------
+  # Count genotypes
+  # -----------------------------
+  genotype_counts <- merged_data %>%
+    group_by(GT) %>%
+    summarise(count = n(), .groups = "drop")
+
+  merged_data <- merged_data %>%
+    left_join(genotype_counts, by = "GT") %>%
+    mutate(Genotype = paste0(GT, "\n(", count, ")"))
+
+  # -----------------------------
+  # Plot
+  # -----------------------------
+  p <- ggplot(merged_data, aes(x = Genotype, y = PHENO)) +
+    geom_violin(fill = "cadetblue3", alpha = 0.3) +
+    geom_boxplot(
+      width = 0.2,
+      outlier.size = 2,
+      outlier.colour = "red",
+      alpha = 0.5,
+      fill = "darkcyan"
+    ) +
+    labs(
+      title = paste("Snarl:", snarl_id),
+      x = "Genotype",
+      y = "Phenotype"
+    ) +
+    theme_bw()
+
+  # -----------------------------
+  # Save output
+  # -----------------------------
+  ggsave(
+    filename = output,
+    plot = p,
+    device = "jpeg",
+    width = 8,
+    height = 6,
+    dpi = 300
+  )
+
+  message("Saved plot: ", output)
 }
+
