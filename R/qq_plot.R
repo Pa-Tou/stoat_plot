@@ -33,7 +33,7 @@ qq_plot <- function(input, column_names="", output = "qq_plot.png") {
   # Convert p-value column to numeric
   pvals <- as.numeric(data[[p_column]])
 
-  if (any(is.na(pvals) & pvals < 0 & pvals > 1)) {
+  if (any(c(is.na(pvals), pvals < 0, pvals > 1))) {
     warning("Invalide values detected in the p-value column. They will be excluded from the plot.")
   }
 
