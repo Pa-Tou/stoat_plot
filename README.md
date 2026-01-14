@@ -94,6 +94,7 @@ This package imports:
 * `ggplot2`
 * `dplyr`
 * `tools`
+* `tidyr`
 
 Make sure these packages are installed before using `stoatPlot`.
 

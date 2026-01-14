@@ -36,18 +36,14 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   all_lines <- readLines(genotype_file)
 
-  # Find header line (WITH #)
   header_idx <- grep("^#START_NODE", all_lines)
-
   if (length(header_idx) == 0) {
     stop("START_NODE header not found in genotype file")
   }
 
-  # Parse header
   header_line <- sub("^#", "", all_lines[header_idx])
   header_cols <- strsplit(header_line, "\t")[[1]]
 
-  # Read data after header
   geno_data <- read.table(
     genotype_file,
     header = FALSE,
@@ -60,42 +56,41 @@ genotype_boxplots <- function(genotype_file,
 
   # -----------------------------
   # Create snarl ID
-  # Remove < and > safely
   # -----------------------------
-  geno_data <- dplyr::mutate(
-    geno_data,
-    SNARL_ID = paste0(gsub("[<>]", "", START_NODE), "_", gsub("[<>]", "", END_NODE))
-  )
+  geno_data <- geno_data |>
+    dplyr::mutate(
+      SNARL_ID = paste0(
+        gsub("[<>]", "", START_NODE),
+        "_",
+        gsub("[<>]", "", END_NODE)
+      )
+    )
 
   target_snarl <- paste0(node_start, "_", node_end)
 
-  # Filter selected snarl
-  filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl)
+  filtered <- geno_data |>
+    dplyr::filter(SNARL_ID == target_snarl)
 
-  # Try reversed order if not found
   if (nrow(filtered) == 0) {
-    message(
-      sprintf(
-        "snarl_id %s not found, trying reversed order",
-        target_snarl
-      )
-    )
-    
+    message(sprintf(
+      "snarl_id %s not found, trying reversed order",
+      target_snarl
+    ))
+
     target_snarl_rev <- paste0(node_end, "_", node_start)
-    filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl_rev)
-    
+
+    filtered <- geno_data |>
+      dplyr::filter(SNARL_ID == target_snarl_rev)
+
     if (nrow(filtered) == 0) {
-      stop(
-        sprintf(
-          "snarl_id %s or %s not found in genotype file",
-          target_snarl,
-          target_snarl_rev
-        )
-      )
+      stop(sprintf(
+        "snarl_id %s or %s not found in genotype file",
+        target_snarl,
+        target_snarl_rev
+      ))
     }
   }
 
-  # Replace geno_data with filtered snarl
   geno_data <- filtered
 
   # -----------------------------
@@ -111,10 +106,10 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   # Convert to sample-long format
   # -----------------------------
-  geno_long <- geno_data %>%
-    select(all_of(genotype_columns)) %>%
-    pivot_longer(
-      cols = everything(),
+  geno_long <- geno_data |>
+    dplyr::select(dplyr::all_of(genotype_columns)) |>
+    tidyr::pivot_longer(
+      cols = dplyr::everything(),
       names_to = "IID",
       values_to = "GT"
     )
@@ -122,68 +117,63 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   # Merge genotype with phenotype
   # -----------------------------
-  # Check if all genotype samples are in phenotype file
   missing_in_pheno <- setdiff(genotype_columns, pheno_data$IID)
   if (length(missing_in_pheno) > 0) {
-    stop(
-      sprintf(
-        "ERROR: The following genotype samples are missing in the phenotype file: %s",
-        paste(missing_in_pheno, collapse = ", ")
-      )
-    )
+    stop(sprintf(
+      "ERROR: The following genotype samples are missing in the phenotype file: %s",
+      paste(missing_in_pheno, collapse = ", ")
+    ))
   }
 
-  # Check if some phenotype samples are not in genotype
   missing_in_geno <- setdiff(pheno_data$IID, genotype_columns)
   if (length(missing_in_geno) > 0) {
-    warning(
-      sprintf(
-        "WARNING: The following phenotype samples are not present in the genotype file: %s",
-        paste(missing_in_geno, collapse = ", ")
-      )
-    )
+    warning(sprintf(
+      "WARNING: The following phenotype samples are not present in the genotype file: %s",
+      paste(missing_in_geno, collapse = ", ")
+    ))
   }
 
-  # Proceed with merge
-  merged_data <- left_join(
-    geno_long, 
-    pheno_data, 
-    by = "IID") %>% filter(!is.na(PHENO))
+  merged_data <- geno_long |>
+    dplyr::left_join(pheno_data, by = "IID") |>
+    dplyr::filter(!is.na(PHENO))
 
   # -----------------------------
   # Count genotypes
   # -----------------------------
-  genotype_counts <- merged_data %>%
-    group_by(GT) %>%
-    summarise(count = n(), .groups = "drop")
+  genotype_counts <- merged_data |>
+    dplyr::group_by(GT) |>
+    dplyr::summarise(count = dplyr::n(), .groups = "drop")
 
-  merged_data <- merged_data %>%
-    left_join(genotype_counts, by = "GT") %>%
-    mutate(Genotype = paste0(GT, "\n(", count, ")"))
+  merged_data <- merged_data |>
+    dplyr::left_join(genotype_counts, by = "GT") |>
+    dplyr::mutate(Genotype = paste0(GT, "\n(", count, ")"))
 
   # -----------------------------
   # Plot
   # -----------------------------
-  p <- ggplot(merged_data, aes(x = Genotype, y = PHENO)) +
-    geom_violin(fill = "cadetblue3", alpha = 0.3) +
-    geom_boxplot(
+  p <- ggplot2::ggplot(
+    merged_data,
+    ggplot2::aes(x = Genotype, y = PHENO)
+  ) +
+    ggplot2::geom_violin(fill = "cadetblue3", alpha = 0.3) +
+    ggplot2::geom_boxplot(
       width = 0.2,
       outlier.size = 2,
       outlier.colour = "red",
       alpha = 0.5,
       fill = "darkcyan"
     ) +
-    labs(
+    ggplot2::labs(
       title = paste("Snarl:", target_snarl),
       x = "Genotype",
       y = "Phenotype"
     ) +
-    theme_bw()
+    ggplot2::theme_bw()
 
   # -----------------------------
   # Save output
   # -----------------------------
-  ggsave(
+  ggplot2::ggsave(
     filename = output,
     plot = p,
     device = "jpeg",

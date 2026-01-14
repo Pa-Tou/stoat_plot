@@ -9,5 +9,6 @@ LazyData: true
 Imports:
     ggplot2,
     dplyr,
+    tidyr,
     tools
 RoxygenNote: 7.3.3
