@@ -3,7 +3,9 @@
 #'
 #' @param genotype_file Genotype file output of stoat vcf/graph
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
-#' @param snarl_id Snarl ID to plot
+#' @param node_start Node start boundary of the snarl
+#' @param node_end Snarl end boundary of the snarl
+
 #' @param output Path/Name to save the output plot image.
 #'
 #' @return Saves a genotype boxplots to the specified file.
@@ -12,7 +14,8 @@
 
 genotype_boxplots <- function(genotype_file,
                               phenotype_file,
-                              snarl_id,
+                              node_start,
+                              node_end,
                               output = "boxplots.jpeg") {
 
   # -----------------------------
@@ -32,8 +35,6 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   all_lines <- readLines(genotype_file)
 
-  print(all_lines)
-
   # Find header line (WITH #)
   header_idx <- grep("^#START_NODE", all_lines)
 
@@ -41,11 +42,11 @@ genotype_boxplots <- function(genotype_file,
     stop("START_NODE header not found in genotype file")
   }
 
-  # Remove leading '#'
+  # Parse header
   header_line <- sub("^#", "", all_lines[header_idx])
   header_cols <- strsplit(header_line, "\t")[[1]]
 
-  # Read data starting AFTER the header line
+  # Read data after header
   geno_data <- read.table(
     genotype_file,
     header = FALSE,
@@ -57,20 +58,46 @@ genotype_boxplots <- function(genotype_file,
   colnames(geno_data) <- header_cols
 
   # -----------------------------
-  # Create snarl ID (NO SEPARATOR)
+  # Create snarl ID
+  # Remove < and > safely
   # -----------------------------
-  geno_data <- geno_data %>%
-    mutate(
-      SNARL_ID = paste0(START_NODE, END_NODE)
-    )
+  geno_data <- dplyr::mutate(
+    geno_data,
+    START_NODE_CLEAN = gsub("[<>]", "", START_NODE),
+    END_NODE_CLEAN   = gsub("[<>]", "", END_NODE),
+    SNARL_ID = paste0(START_NODE_CLEAN, "_", END_NODE_CLEAN)
+  )
+
+  target_snarl <- paste0(node_start, "_", node_end)
 
   # Filter selected snarl
-  geno_data <- geno_data %>%
-    filter(SNARL_ID == snarl_id)
+  filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl)
 
-  if (nrow(geno_data) == 0) {
-    stop("snarl_id not found in genotype file")
+  # Try reversed order if not found
+  if (nrow(filtered) == 0) {
+    message(
+      sprintf(
+        "snarl_id %s not found, trying reversed order",
+        target_snarl
+      )
+    )
+
+    target_snarl_rev <- paste0(node_end, "_", node_start)
+    filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl_rev)
+
+    if (nrow(filtered) == 0) {
+      stop(
+        sprintf(
+          "snarl_id %s or %s not found in genotype file",
+          target_snarl,
+          target_snarl_rev
+        )
+      )
+    }
   }
+
+  # Replace geno_data with filtered snarl
+  geno_data <- filtered
 
   # -----------------------------
   # Identify genotype columns

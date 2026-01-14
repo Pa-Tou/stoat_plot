@@ -7,7 +7,8 @@
 genotype_boxplots(
   genotype_file,
   phenotype_file,
-  snarl_id,
+  node_start,
+  node_end,
   output = "boxplots.jpeg"
 )
 }
@@ -16,7 +17,9 @@ genotype_boxplots(
 
 \item{phenotype_file}{Path to the phenotype file use for the GWAS analysis.}
 
-\item{snarl_id}{Snarl ID to plot}
+\item{node_start}{Node start boundary of the snarl}
+
+\item{node_end}{Snarl end boundary of the snarl}
 
 \item{output}{Path/Name to save the output plot image.}
 }
