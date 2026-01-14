@@ -76,7 +76,7 @@ qq_plot("data/gwas/binary_table_vcf.tsv")
 plot_pvalue_hist("data/gwas/binary_table_vcf.tsv", p_threshold = 0.01)
 
 # Boxplot of phenotype/genotype for all regression table represent in a dir
-generate_boxplots(phenotype_file="data/phenotype/binary_phenotype.tsv", dir_path="data/regression")
+genotype_boxplots("data/genotype/pg.snarl.tsv", "data/phenotype/binary_phenotype_samples.tsv", 4260, 4252, output = "boxplots.jpeg")
 
 # Dot Plot of Path Length Frequencies
 path_length_distribution("data/snarl_paths/binary_snarl_analyse.tsv")

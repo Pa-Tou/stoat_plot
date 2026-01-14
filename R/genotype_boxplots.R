@@ -25,7 +25,8 @@ genotype_boxplots <- function(genotype_file,
     phenotype_file,
     header = TRUE,
     sep = "\t",
-    stringsAsFactors = FALSE
+    stringsAsFactors = FALSE,
+    comment.char = ""
   )
 
   stopifnot(all(c("IID", "PHENO") %in% colnames(pheno_data)))
@@ -63,9 +64,7 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   geno_data <- dplyr::mutate(
     geno_data,
-    START_NODE_CLEAN = gsub("[<>]", "", START_NODE),
-    END_NODE_CLEAN   = gsub("[<>]", "", END_NODE),
-    SNARL_ID = paste0(START_NODE_CLEAN, "_", END_NODE_CLEAN)
+    SNARL_ID = paste0(gsub("[<>]", "", START_NODE), "_", gsub("[<>]", "", END_NODE))
   )
 
   target_snarl <- paste0(node_start, "_", node_end)
@@ -81,10 +80,10 @@ genotype_boxplots <- function(genotype_file,
         target_snarl
       )
     )
-
+    
     target_snarl_rev <- paste0(node_end, "_", node_start)
     filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl_rev)
-
+    
     if (nrow(filtered) == 0) {
       stop(
         sprintf(
@@ -121,10 +120,35 @@ genotype_boxplots <- function(genotype_file,
     )
 
   # -----------------------------
-  # Merge with phenotype
+  # Merge genotype with phenotype
   # -----------------------------
-  merged_data <- left_join(geno_long, pheno_data, by = "IID") %>%
-    filter(!is.na(PHENO))
+  # Check if all genotype samples are in phenotype file
+  missing_in_pheno <- setdiff(genotype_columns, pheno_data$IID)
+  if (length(missing_in_pheno) > 0) {
+    stop(
+      sprintf(
+        "ERROR: The following genotype samples are missing in the phenotype file: %s",
+        paste(missing_in_pheno, collapse = ", ")
+      )
+    )
+  }
+
+  # Check if some phenotype samples are not in genotype
+  missing_in_geno <- setdiff(pheno_data$IID, genotype_columns)
+  if (length(missing_in_geno) > 0) {
+    warning(
+      sprintf(
+        "WARNING: The following phenotype samples are not present in the genotype file: %s",
+        paste(missing_in_geno, collapse = ", ")
+      )
+    )
+  }
+
+  # Proceed with merge
+  merged_data <- left_join(
+    geno_long, 
+    pheno_data, 
+    by = "IID") %>% filter(!is.na(PHENO))
 
   # -----------------------------
   # Count genotypes
@@ -150,7 +174,7 @@ genotype_boxplots <- function(genotype_file,
       fill = "darkcyan"
     ) +
     labs(
-      title = paste("Snarl:", snarl_id),
+      title = paste("Snarl:", target_snarl),
       x = "Genotype",
       y = "Phenotype"
     ) +
@@ -170,4 +194,3 @@ genotype_boxplots <- function(genotype_file,
 
   message("Saved plot: ", output)
 }
-
