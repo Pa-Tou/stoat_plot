@@ -1,12 +1,16 @@
 #' Dot Plot of Path Length Frequencies
 #' @description Create a dot plot from a TSV file containing a `path_length` column.
-#'
+#' 
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
+#' @importFrom utils read.table
+#' 
 #' @param input Path to the input TSV file.
 #' @param output Path to save the output plot image.
 #'
 #' @return Saves a dot plot to the specified file.
 #' @name path_length_distribution
 #' @export
+
 path_length_distribution <- function(input, output="paths_length_distribution.png") {
 
   # Read input
@@ -28,16 +32,16 @@ path_length_distribution <- function(input, output="paths_length_distribution.pn
   freq_df$Path_Length <- as.numeric(as.character(freq_df$Path_Length))
 
   # ----------------- PLOT -----------------
-  plot <- ggplot2::ggplot(freq_df, ggplot2::aes(x = Path_Length, y = Frequency)) +
-    ggplot2::geom_point(size = 3, color = "steelblue") +
-    ggplot2::labs(
+  plot <- ggplot(freq_df, aes(x = Path_Length, y = Frequency)) +
+    geom_point(size = 3, color = "steelblue") +
+    labs(
       title = "Dot Plot of Path Length Frequency",
       x = "Path Length",
       y = "Frequency"
     ) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(text = ggplot2::element_text(size = 14))
+    theme_bw() +
+    theme(text = element_text(size = 14))
 
   # Save plot
-  ggplot2::ggsave(output, plot, width = 6, height = 4)
+  ggsave(output, plot, width = 6, height = 4)
 }

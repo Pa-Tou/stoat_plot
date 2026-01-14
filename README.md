@@ -67,7 +67,7 @@ devtools::install_github("Pa-Tou/stoat_plot")
 library(StoatPlot)
 
 # Manhattan plot 
-plot_manhattan("data/gwas/binary_table_vcf.tsv")
+manhattan_plot("data/gwas/binary_table_vcf.tsv")
 
 # Q-Q plot
 qq_plot("data/gwas/binary_table_vcf.tsv")
@@ -83,6 +83,9 @@ path_length_distribution("data/snarl_paths/binary_snarl_analyse.tsv")
 
 # Create a histogram plot
 snarl_type_histogram("data/snarl_paths/binary_snarl_analyse.tsv")
+
+# Create a scatter plot
+scatter_plot("data/snarl_paths/binary_snarl_analyse.tsv")
 ```
 
 ---

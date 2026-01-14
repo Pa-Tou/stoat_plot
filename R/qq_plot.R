@@ -1,6 +1,9 @@
 #' Q-Q Plot for GWAS Results
 #' @description Generate QQ plot from STOAT GWAS results using P or P_CHI2 column.
 #'
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
+#' @importFrom utils read.table
+#' 
 #' @param input Path to the input TSV file (must contain a column named 'P').
 #' @param output Filename for the output PNG plot (default: "qq_plot.png").
 #' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
@@ -50,19 +53,19 @@ qq_plot <- function(input, column_names="", output = "qq_plot.png") {
   plot_df <- data.frame(Expected = expected, Observed = observed)
 
   # Plot
-  p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = Expected, y = Observed)) +
-    ggplot2::geom_point(size = 1.5, color = "steelblue") +
-    ggplot2::geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-    ggplot2::labs(
+  p <- ggplot(plot_df, aes(x = Expected, y = Observed)) +
+    geom_point(size = 1.5, color = "steelblue") +
+    geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+    labs(
       title = "QQ Plot",
       x = "Expected -log10(P)",
       y = "Observed -log10(P)"
     ) +
-    ggplot2::theme_bw(base_size = 14) +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(hjust = 0.5)
+    theme_bw(base_size = 14) +
+    theme(
+      plot.title = element_text(hjust = 0.5)
     )
 
   # Save plot
-  ggplot2::ggsave(output, plot = p, width = 6, height = 6)
+  ggsave(output, plot = p, width = 6, height = 6)
 }

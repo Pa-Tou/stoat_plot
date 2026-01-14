@@ -6,7 +6,7 @@
 \usage{
 scatter_plot(
   input_file,
-  out_file,
+  out_file = "scatter_plot.png",
   title = "Title",
   x_label = "",
   y_label = "",

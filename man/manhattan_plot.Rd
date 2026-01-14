@@ -16,10 +16,12 @@ manhattan_plot(
 
 \item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 
+\item{p_threshold}{P-value threshold for the horizontal significance line.}
+
 \item{output}{Path to save the output plot image.}
 }
 \value{
-Saves a manhattan_plot to the specified file.
+Saves a Manhattan plot to the specified file.
 }
 \description{
 Generate Manhattan plots from STOAT GWAS results (keeps CHR names like 'chr1', 'chrX', etc.)

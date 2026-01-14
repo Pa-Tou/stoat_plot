@@ -2,6 +2,9 @@
 #' Dot Plot of snarl type histogram
 #' @description Create a histogram plot from a TSV file containing a `path_length` column.
 #'
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline geom_bar
+#' @importFrom utils read.table
+#' 
 #' @param input Path to the input TSV file.
 #' @param output Path to save the output plot image.
 #'
@@ -50,15 +53,15 @@ snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
   print(variant_counts)
 
   # ----------------- PLOT -----------------
-  plot <- ggplot2::ggplot(variant_counts, ggplot2::aes(x = Variant_Type, y = Count, fill = Variant_Type)) +
-    ggplot2::geom_bar(stat = "identity", position = "stack") +
-    ggplot2::labs(title = "Snarl Type Distribution",
+  plot <- ggplot(variant_counts, aes(x = Variant_Type, y = Count, fill = Variant_Type)) +
+    geom_bar(stat = "identity", position = "stack") +
+    labs(title = "Snarl Type Distribution",
                   x = "Snarl Type",
                   y = "Count") +
-    ggplot2::theme_bw(base_size = 14) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5),
+    theme_bw(base_size = 14) +
+    theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
                    legend.position = "top")
 
   # Save plot
-  ggplot2::ggsave(output, plot, width = 6, height = 4)
+  ggsave(output, plot, width = 6, height = 4)
 }

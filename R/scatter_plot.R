@@ -4,6 +4,9 @@
 #' Generate a scatter plot from a tab-separated file, with support for optional
 #' gzipped input, color grouping, and log transformation of the y-axis.
 #'
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline theme_minimal scale_y_log10
+#' @importFrom utils read.table
+#' 
 #' @param input_file   Path to input file (.txt or .gz), tab-separated. Header is expected.
 #' @param out_file     Path to save the output image (e.g., "output.png").
 #' @param title        Plot title (default: "Title").
@@ -19,9 +22,10 @@
 #'
 #' @name scatter_plot
 #' @export
+
 scatter_plot <- function(
   input_file,
-  out_file,
+  out_file = "scatter_plot.png",
   title = "Title",
   x_label = "",
   y_label = "",
@@ -31,7 +35,7 @@ scatter_plot <- function(
   log_y = FALSE) {
 
   # Read data
-  data <- utils::read.table(
+  data <- read.table(
     input_file,
     header = TRUE,
     sep = "\t",
@@ -66,21 +70,21 @@ scatter_plot <- function(
   df$group_label <- paste0(df$group, ": ", group_counts[df$group])
 
   # Build the plot
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y)) +
-    ggplot2::geom_point(ggplot2::aes(color = group_label), alpha = 0.7) +
-    ggplot2::labs(
+  p <- ggplot(df, aes(x = x, y = y)) +
+    geom_point(aes(color = group_label), alpha = 0.7) +
+    labs(
       title = title,
       x = x_label,
       y = y_label,
       color = if (!is.null(color_name)) paste0(color_name, ": count") else NULL
     ) +
-    ggplot2::theme_minimal()
+    theme_minimal()
 
   # Apply log scale to y-axis if needed
   if (log_y) {
-    p <- p + ggplot2::scale_y_log10()
+    p <- p + scale_y_log10()
   }
 
   # Save plot
-  ggplot2::ggsave(out_file, plot = p, width = 12, height = 10, dpi = 400)
+  ggsave(out_file, plot = p, width = 12, height = 10, dpi = 400)
 }

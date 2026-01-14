@@ -1,6 +1,9 @@
 #' P-value Histogram for STOAT GWAS Results
 #' @description Generate histogram of P-values from STOAT GWAS results TSV.
 #'
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline aes_string geom_histogram
+#' @importFrom utils read.table
+#' 
 #' @param input Path to input TSV file.
 #' @param output Filename to save the output plot (default: "pvalue_distribution_plot.png").
 #' @param p_threshold Maximum P-value threshold to include in the plot (default: 0.1).
@@ -48,15 +51,15 @@ plot_pvalue_hist <- function(input, column_names = "", p_threshold = 0.1, bin = 
   }
 
   # Plot histogram using ggplot2
-  p <- ggplot2::ggplot(data_filtered, ggplot2::aes_string(x = p_col)) +
-    ggplot2::geom_histogram(bins = bin, fill = "skyblue", color = "black") +
-    ggplot2::theme_bw() +
-    ggplot2::labs(
+  p <- ggplot(data_filtered, aes_string(x = p_col)) +
+    geom_histogram(bins = bin, fill = "skyblue", color = "black") +
+    theme_bw() +
+    labs(
       title = paste("Distribution of P-values (0 -", p_threshold, ")"),
       x = "P-value",
       y = "Frequency"
     )
 
   # Save plot
-  ggplot2::ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
+  ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
 }
