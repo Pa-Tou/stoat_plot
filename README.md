@@ -30,10 +30,12 @@ install.packages("devtools")
 usethis::create_package("StoatPlot")
 devtools::load_all()
 devtools::document()
+devtools::install()
 devtools::check()
 devtools::test()
 usethis::use_test()
 devtools::build()
+library(StoatPlot)
 -->
 
 ```r
@@ -64,19 +66,23 @@ devtools::install_github("Pa-Tou/stoat_plot")
 ## Example Usage
 
 ```r
+devtools::install()
 library(StoatPlot)
 
+# Print summary 
+summary_stoat("data/gwas/pg.gwas.tsv")
+
 # Manhattan plot 
-manhattan_plot("data/gwas/binary_table_vcf.tsv")
+manhattan_plot("data/gwas/pg.gwas.tsv")
 
 # Q-Q plot
-qq_plot("data/gwas/binary_table_vcf.tsv")
+qq_plot("data/gwas/pg.gwas.tsv")
 
 # Histogram of p-values
-plot_pvalue_hist("data/gwas/binary_table_vcf.tsv", p_threshold = 0.01)
+plot_pvalue_hist("data/gwas/pg.gwas.tsv", p_threshold = 0.01)
 
 # Boxplot of phenotype/genotype for all regression table represent in a dir
-genotype_boxplots("data/genotype/pg.snarl.tsv", "data/phenotype/binary_phenotype_samples.tsv", 4260, 4252, output = "boxplots.jpeg")
+genotype_boxplots("data/genotype/pg.snarl.tsv", "data/phenotype/binary_phenotype_samples.tsv", "<4271", ">4260", output = "boxplots.jpeg")
 
 # Dot Plot of Path Length Frequencies
 path_length_distribution("data/snarl_paths/binary_snarl_analyse.tsv")

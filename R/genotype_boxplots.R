@@ -9,8 +9,8 @@
 #' 
 #' @param genotype_file Genotype file output of stoat vcf/graph
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
-#' @param node_start Node start boundary of the snarl
-#' @param node_end Snarl end boundary of the snarl
+#' @param node_start Node start boundary of the snarl [string]
+#' @param node_end Snarl end boundary of the snarl [string]
 
 #' @param output Path/Name to save the output plot image.
 #'
@@ -32,90 +32,74 @@ genotype_boxplots <- function(genotype_file,
     header = TRUE,
     sep = "\t",
     stringsAsFactors = FALSE,
-    comment.char = ""
+    comment.char = "",
+    check.names = FALSE
   )
 
   stopifnot(all(c("IID", "PHENO") %in% colnames(pheno_data)))
 
   # -----------------------------
-  # Read STOAT genotype table
+  # Read STOAT genotype file (FORMAT-AWARE)
   # -----------------------------
-  all_lines <- readLines(genotype_file)
+  lines <- readLines(genotype_file)
 
-  # Find header line (WITH #)
-  header_idx <- grep("^#START_NODE", all_lines)
-
+  header_idx <- grep("^#START_NODE", lines)
   if (length(header_idx) == 0) {
     stop("START_NODE header not found in genotype file")
   }
 
-  # Parse header
-  header_line <- sub("^#", "", all_lines[header_idx])
-  header_cols <- strsplit(header_line, "\t")[[1]]
+  header <- sub("^#", "", lines[header_idx])
+  col_names <- strsplit(header, "\t")[[1]]
 
-  # Read data after header
+  data_lines <- lines[(header_idx + 1):length(lines)]
+  data_lines <- data_lines[!grepl("^#", data_lines)]
+
   geno_data <- read.table(
-    genotype_file,
-    header = FALSE,
+    text = data_lines,
     sep = "\t",
-    skip = header_idx,
-    stringsAsFactors = FALSE
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = col_names,
+    check.names = FALSE
   )
-
-  colnames(geno_data) <- header_cols
 
   # -----------------------------
   # Create snarl ID
-  # Remove < and > safely
   # -----------------------------
-  geno_data <- dplyr::mutate(
-    geno_data,
-    SNARL_ID = paste0(gsub("[<>]", "", START_NODE), "_", gsub("[<>]", "", END_NODE))
-  )
+  geno_data <- geno_data %>%
+    mutate(SNARL_ID = paste0(START_NODE, END_NODE))
 
-  target_snarl <- paste0(node_start, "_", node_end)
+  target_snarl <- paste0(node_start, node_end)
 
-  # Filter selected snarl
-  filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl)
+  geno_data <- geno_data %>%
+    filter(SNARL_ID == target_snarl)
 
-  # Try reversed order if not found
-  if (nrow(filtered) == 0) {
-    message(
-      sprintf(
-        "snarl_id %s not found, trying reversed order",
-        target_snarl
-      )
-    )
-    
-    target_snarl_rev <- paste0(node_end, "_", node_start)
-    filtered <- dplyr::filter(geno_data, SNARL_ID == target_snarl_rev)
-    
-    if (nrow(filtered) == 0) {
-      stop(
-        sprintf(
-          "snarl_id %s or %s not found in genotype file",
-          target_snarl,
-          target_snarl_rev
-        )
-      )
-    }
+  if (nrow(geno_data) == 0) {
+    stop(sprintf("snarl_id %s not found in genotype file", target_snarl))
   }
 
-  # Replace geno_data with filtered snarl
-  geno_data <- filtered
+  # -----------------------------
+  # Identify genotype/sample columns
+  # (all columns after SEQUENCES)
+  # -----------------------------
+  seq_idx <- which(colnames(geno_data) == "SEQUENCES")
+
+  if (length(seq_idx) != 1) {
+    stop("Column 'SEQUENCES' not found or not unique in genotype file.")
+  }
+
+  # all columns after SEQUENCES
+  genotype_columns <- colnames(geno_data)[(seq_idx + 1):ncol(geno_data)]
+
+  # Remove any derived columns that are not samples (e.g., SNARL_ID if exists)
+  genotype_columns <- setdiff(genotype_columns, c("SNARL_ID"))
+
+  if (length(genotype_columns) == 0) {
+    stop("No genotype/sample columns detected after 'SEQUENCES'.")
+  }
 
   # -----------------------------
-  # Identify genotype columns
-  # -----------------------------
-  fixed_cols <- c(
-    "START_NODE", "END_NODE", "REF", "START_OFFSET", "END_OFFSET",
-    "DEPTH", "ALLELE_LENGTHS", "WALKS", "SEQUENCES", "SNARL_ID"
-  )
-
-  genotype_columns <- setdiff(colnames(geno_data), fixed_cols)
-
-  # -----------------------------
-  # Convert to sample-long format
+  # Convert to long format
   # -----------------------------
   geno_long <- geno_data %>%
     select(all_of(genotype_columns)) %>%
@@ -125,36 +109,34 @@ genotype_boxplots <- function(genotype_file,
       values_to = "GT"
     )
 
+  # Ensure genotype numeric
+  geno_long$GT <- as.numeric(geno_long$GT)
+
   # -----------------------------
-  # Merge genotype with phenotype
+  # Merge with phenotype
   # -----------------------------
-  # Check if all genotype samples are in phenotype file
   missing_in_pheno <- setdiff(genotype_columns, pheno_data$IID)
   if (length(missing_in_pheno) > 0) {
     stop(
       sprintf(
-        "ERROR: The following genotype samples are missing in the phenotype file: %s",
+        "ERROR: Missing samples in phenotype file: %s",
         paste(missing_in_pheno, collapse = ", ")
       )
     )
   }
 
-  # Check if some phenotype samples are not in genotype
   missing_in_geno <- setdiff(pheno_data$IID, genotype_columns)
   if (length(missing_in_geno) > 0) {
     warning(
       sprintf(
-        "WARNING: The following phenotype samples are not present in the genotype file: %s",
+        "WARNING: Phenotype samples not in genotype file: %s",
         paste(missing_in_geno, collapse = ", ")
       )
     )
   }
 
-  # Proceed with merge
-  merged_data <- left_join(
-    geno_long, 
-    pheno_data, 
-    by = "IID") %>% 
+  merged_data <- geno_long %>%
+    left_join(pheno_data, by = "IID") %>%
     filter(!is.na(PHENO))
 
   # -----------------------------
@@ -185,10 +167,10 @@ genotype_boxplots <- function(genotype_file,
       x = "Genotype",
       y = "Phenotype"
     ) +
-    theme_bw()
+    theme_bw(base_size = 14)
 
   # -----------------------------
-  # Save output
+  # Save
   # -----------------------------
   ggsave(
     filename = output,

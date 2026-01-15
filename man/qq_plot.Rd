@@ -4,7 +4,7 @@
 \alias{qq_plot}
 \title{Q-Q Plot for GWAS Results}
 \usage{
-qq_plot(input, column_names = "", output = "qq_plot.png")
+qq_plot(input, column_names = "P", output = "qq_plot.png")
 }
 \arguments{
 \item{input}{Path to the input TSV file (must contain a column named 'P').}

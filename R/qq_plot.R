@@ -11,61 +11,76 @@
 #' @return Saves a Q-Q plot image.
 #' @name qq_plot
 #' @export
-qq_plot <- function(input, column_names="", output = "qq_plot.png") {
 
-  # Read input file
-  data <- read.table(input, header = TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = FALSE, comment.char = "" )
-  colnames(data)[1] <- sub("^#", "", colnames(data)[1])  # remove leading #
+qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
 
-  # Determine the column to use for p-values
-  if (column_names != "") {
-    if (!(column_names %in% colnames(data))) {
-      stop(paste("Column", column_names, "not found in the input file."))
-    }
-    p_column <- column_names
-  } else {
-    if ("P" %in% colnames(data)) {
-      p_column <- "P"
-    } else if ("P_CHI2" %in% colnames(data)) {
-      p_column <- "P_CHI2"
-    } else {
-      stop("Neither 'P' nor 'P_CHI2' column found in the input file.")
-    }
+  library(ggplot2)
+
+  # Read all lines
+  lines <- readLines(input)
+
+  # Identify the header line (starts with #START_NODE)
+  header_idx <- grep("^#START_NODE", lines)
+  if (length(header_idx) == 0) {
+    stop("Header line '#START_NODE' not found in the file.")
   }
 
-  # Convert p-value column to numeric
-  pvals <- as.numeric(data[[p_column]])
+  # Extract header and clean '#'
+  header <- sub("^#", "", lines[header_idx])
+  col_names <- strsplit(header, "\t")[[1]]
 
-  if (any(c(is.na(pvals), pvals < 0, pvals > 1))) {
-    warning("Invalide values detected in the p-value column. They will be excluded from the plot.")
+  # Extract data lines (after header, not starting with #)
+  data_lines <- lines[(header_idx + 1):length(lines)]
+  data_lines <- data_lines[!grepl("^#", data_lines)]
+
+  # Read data into data.frame
+  data <- read.table(
+    text = data_lines,
+    sep = "\t",
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = col_names
+  )
+
+  # Check p-value column
+  if (!(column_names %in% colnames(data))) {
+    stop(paste("Column", column_names, "not found in the input file."))
   }
 
-  # Clean P-values
-  pvals <- pvals[!is.na(pvals) & pvals > 0 & pvals <= 1]
-  pvals <- pmax(pvals, 1e-300)  # Avoid log(0)
+  # Convert p-values
+  pvals <- suppressWarnings(as.numeric(data[[column_names]]))
+
+  # Filter valid p-values
+  valid <- !is.na(pvals) & pvals > 0 & pvals <= 1
+  if (any(!valid)) {
+    warning("Invalid p-values detected and removed.")
+  }
+  pvals <- pvals[valid]
+  pvals <- pmax(pvals, 1e-300)
 
   # Expected and observed -log10(P)
   n <- length(pvals)
   expected <- -log10((1:n) / (n + 1))
   observed <- -log10(sort(pvals))
 
-  # Data frame for plotting
   plot_df <- data.frame(Expected = expected, Observed = observed)
 
+  # Genomic inflation factor
+  chisq <- qchisq(1 - pvals, df = 1)
+  lambda <- median(chisq, na.rm = TRUE) / qchisq(0.5, df = 1)
+
   # Plot
-  p <- ggplot(plot_df, aes(x = Expected, y = Observed)) +
-    geom_point(size = 1.5, color = "steelblue") +
-    geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  p <- ggplot(plot_df, aes(Expected, Observed)) +
+    geom_point(size = 1.5, color = "steelblue", alpha = 0.7) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
     labs(
       title = "QQ Plot",
+      subtitle = paste0("Genomic inflation factor (λ) = ", round(lambda, 3)),
       x = "Expected -log10(P)",
       y = "Observed -log10(P)"
     ) +
-    theme_bw(base_size = 14) +
-    theme(
-      plot.title = element_text(hjust = 0.5)
-    )
+    theme_bw(base_size = 14)
 
-  # Save plot
+  # Save
   ggsave(output, plot = p, width = 6, height = 6)
 }

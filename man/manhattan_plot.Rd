@@ -6,7 +6,10 @@
 \usage{
 manhattan_plot(
   input,
-  column_names = "",
+  p_column = "P",
+  chr = NULL,
+  start = NULL,
+  end = NULL,
   p_threshold = 1e-05,
   output = "manhattan_plot.png"
 )
@@ -14,11 +17,11 @@ manhattan_plot(
 \arguments{
 \item{input}{Path to the input GWAS TSV file.}
 
-\item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
-
 \item{p_threshold}{P-value threshold for the horizontal significance line.}
 
 \item{output}{Path to save the output plot image.}
+
+\item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 }
 \value{
 Saves a Manhattan plot to the specified file.

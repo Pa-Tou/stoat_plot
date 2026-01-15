@@ -13,85 +13,153 @@
 #' @name manhattan_plot
 #' @export
 
-manhattan_plot <- function(input, column_names="", p_threshold=1e-5, output = "manhattan_plot.png") {
+manhattan_plot <- function(input,
+                            p_column = "P",
+                            chr = NULL,
+                            start = NULL,
+                            end = NULL,
+                            p_threshold = 1e-5,
+                            output = "manhattan_plot.png") {
 
-  data <- read.table(input, header = TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = FALSE, comment.char = "" )
-  colnames(data)[1] <- sub("^#", "", colnames(data)[1])  # remove leading #
+  # -----------------------------
+  # Read file lines
+  # -----------------------------
+  lines <- readLines(input)
 
-  # Determine the column to use for p-values
-  if (column_names != "") {
-    if (!(column_names %in% colnames(data))) {
-      stop(paste("Column", column_names, "not found in the input file."))
-    }
-    p_column <- column_names
+  # Detect header line
+  header_idx <- grep("^#START_NODE", lines)
+  if (length(header_idx) == 0) {
+    stop("Header line '#START_NODE' not found in the input file.")
+  }
+
+  # Parse header
+  header <- sub("^#", "", lines[header_idx])
+  col_names <- strsplit(header, "\t")[[1]]
+
+  # Extract data lines
+  data_lines <- lines[(header_idx + 1):length(lines)]
+  data_lines <- data_lines[!grepl("^#", data_lines)]
+
+  # Read data
+  data <- read.table(
+    text = data_lines,
+    sep = "\t",
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = col_names
+  )
+
+  # -----------------------------
+  # Validate required columns
+  # -----------------------------
+  if (!(p_column %in% colnames(data))) {
+    stop(paste("Column:", p_column, "not found in the input file."))
+  }
+
+  if (!("START_OFFSET" %in% colnames(data))) {
+    stop("Input file must contain column: 'START_OFFSET'")
+  }
+
+  # -----------------------------
+  # Prepare data
+  # -----------------------------
+  data$START_OFFSET <- as.integer(data$START_OFFSET)
+  data$P <- pmax(as.numeric(data[[p_column]]), 1e-300)
+
+  data <- data[!is.na(data$START_OFFSET) & !is.na(data$P), ]
+
+  # Assign chromosome
+  if (!is.null(chr)) {
+    data$CHR <- chr
+  } else if ("REF_INDEX" %in% colnames(data)) {
+    data$CHR <- paste0("ref", data$REF_INDEX)
   } else {
-    if ("P" %in% colnames(data)) {
-      p_column <- "P"
-    } else if ("P_CHI2" %in% colnames(data)) {
-      p_column <- "P_CHI2"
-    } else {
-      stop("Neither 'P' nor 'P_CHI2' column found in the input file.")
-    }
+    stop("Chromosome information missing: provide 'chr' or 'REF_INDEX' column.")
   }
 
-  pvals <- as.numeric(data[[p_column]])
-
-  # Required columns
-  if (!all(c("CHR", "START_POS") %in% colnames(data))) {
-    stop("Input file must contain columns: 'CHR' and 'START_POS'")
+  # -----------------------------
+  # Genomic filters
+  # -----------------------------
+  if (!is.null(start)) {
+    data <- data[data$START_OFFSET >= start, ]
   }
 
-  # Clean START_POS
-  data$START_POS <- as.integer(gsub(",", "", as.character(data$START_POS)))
+  if (!is.null(end)) {
+    data <- data[data$START_OFFSET <= end, ]
+  }
 
-  # Subset and clean
-  data <- data[!is.na(data$CHR) & !is.na(data$START_POS) & !is.na(data[[p_column]]), ]
+  if (!is.null(start) && !is.null(end) && start > end) {
+    stop("start must be <= end")
+  }
+
+  # -----------------------------
+  # Prepare plotting data
+  # -----------------------------
   data <- data.frame(
     CHR = data$CHR,
-    BP = data$START_POS,
-    P = pmax(pvals, 1e-300),
+    BP = data$START_OFFSET,
+    P = data$P,
     stringsAsFactors = FALSE
   )
 
-  # Ensure chromosome is treated as a factor to control plotting order
-  data$CHR <- factor(data$CHR, levels = unique(data$CHR[order(as.character(data$CHR))]))
-
-  # Sort and calculate cumulative START_POSition
-  data <- data[order(data$CHR, data$BP), ]
-  chr_lengths <- tapply(data$BP, data$CHR, max)
-  chr_offsets <- c(0, cumsum(as.numeric(chr_lengths))[-length(chr_lengths)])
-  names(chr_offsets) <- names(chr_lengths)
-  data$cum_bp <- data$BP + chr_offsets[as.character(data$CHR)]
-
-  # Calculate -log10(P)
   data$logp <- -log10(data$P)
 
-  # Midpoints for axis labels
-  axis_df <- aggregate(cum_bp ~ CHR, data = data, FUN = function(x) (min(x) + max(x)) / 2)
+  # -----------------------------
+  # X-axis handling
+  # -----------------------------
+  if (!is.null(chr)) {
+    data$xpos <- data$BP
+    axis_df <- NULL
+    x_label <- paste0(chr, " position (bp)")
+  } else {
+    data$CHR <- factor(data$CHR, levels = unique(data$CHR))
+    data <- data[order(data$CHR, data$BP), ]
+
+    chr_lengths <- tapply(data$BP, data$CHR, max)
+    chr_offsets <- c(0, cumsum(as.numeric(chr_lengths))[-length(chr_lengths)])
+    names(chr_offsets) <- names(chr_lengths)
+
+    data$xpos <- data$BP + chr_offsets[as.character(data$CHR)]
+
+    axis_df <- aggregate(
+      xpos ~ CHR,
+      data = data,
+      FUN = function(x) mean(range(x))
+    )
+
+    x_label <- "Chromosome"
+  }
 
   logp_threshold <- -log10(p_threshold)
 
+  # -----------------------------
   # Plot
-  p <- ggplot(data, aes(x = cum_bp, y = logp)) +
+  # -----------------------------
+  p <- ggplot(data, aes(x = xpos, y = logp)) +
     geom_point(aes(color = CHR), alpha = 0.6, size = 0.7) +
-    scale_color_manual(values = rep(c("black", "grey50"), length.out = length(levels(data$CHR)))) +
-    scale_x_continuous(breaks = axis_df$cum_bp, labels = axis_df$CHR) +
+    geom_hline(yintercept = logp_threshold, color = "red", linetype = "dashed") +
     labs(
-      x = "Chromosome",
+      x = x_label,
       y = expression(-log[10](P)),
       title = "Manhattan Plot"
     ) +
-    # Add threshold line
-    geom_hline(yintercept = logp_threshold, color = "red", linetype = "dashed") +
     theme_bw(base_size = 14) +
     theme(
-      legend.position = "none",  # fixed typo: was "legend.START_POSition"
+      legend.position = "none",
       panel.border = element_blank(),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
       axis.text.x = element_text(angle = 90, vjust = 0.5, size = 10)
     )
 
-  # Save plot
+  if (is.null(chr)) {
+    p <- p +
+      scale_x_continuous(breaks = axis_df$xpos, labels = axis_df$CHR) +
+      scale_color_manual(
+        values = rep(c("black", "grey50"),
+                     length.out = length(levels(data$CHR)))
+      )
+  }
+
   ggsave(output, plot = p, width = 12, height = 4)
 }

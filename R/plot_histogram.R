@@ -13,49 +13,75 @@
 #' @return Saves a histogram plot as an image file.
 #' @name plot_pvalue_hist
 #' @export
-plot_pvalue_hist <- function(input, column_names = "", p_threshold = 0.1, bin = 200, output = "pvalue_distribution_plot.png") {
 
-  # Read data
-  data <- read.table(input, header = TRUE, sep = "\t", stringsAsFactors = FALSE, 
-                     check.names = FALSE, comment.char = "")
-  colnames(data)[1] <- sub("^#", "", colnames(data)[1])  # remove leading # from first column name
+plot_pvalue_hist <- function(input,
+                             column_names = "P",
+                             p_threshold = 1e-5,
+                             bin = 200,
+                             output = "pvalue_distribution_plot.png") {
 
-  # Determine the column to use for p-values
-  if (column_names != "") {
-    if (!(column_names %in% colnames(data))) {
-      stop(paste("Column", column_names, "not found in the input file."))
-    }
-    p_col <- column_names
-  } else {
-    if ("P" %in% colnames(data)) {
-      p_col <- "P"
-    } else if ("P_CHI2" %in% colnames(data)) {
-      p_col <- "P_CHI2"
-    } else {
-      stop("Neither 'P' nor 'P_CHI2' column found in the input file.")
-    }
+  # -----------------------------
+  # Read file lines
+  # -----------------------------
+  lines <- readLines(input)
+
+  # Detect header line
+  header_idx <- grep("^#START_NODE", lines)
+  if (length(header_idx) == 0) {
+    stop("Header line '#START_NODE' not found in the input file.")
   }
 
-  # Convert p-value column to numeric
-  data[[p_col]] <- as.numeric(data[[p_col]])
+  # Parse header
+  header <- sub("^#", "", lines[header_idx])
+  col_names <- strsplit(header, "\t")[[1]]
+
+  # Extract data lines
+  data_lines <- lines[(header_idx + 1):length(lines)]
+  data_lines <- data_lines[!grepl("^#", data_lines)]
+
+  # Read data table
+  data <- read.table(
+    text = data_lines,
+    sep = "\t",
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = col_names
+  )
+
+  # -----------------------------
+  # Determine p-value column
+  # -----------------------------
+  if (!(column_names %in% colnames(data))) {
+    stop(paste("Column", column_names, "not found in the input file."))
+  }
+  p_col <- column_names
+
+  # Convert to numeric
+  data[[p_col]] <- suppressWarnings(as.numeric(data[[p_col]]))
 
   if (any(is.na(data[[p_col]]))) {
-    warning("NA values detected in the p-value column. They will be excluded from the plot.")
+    warning("NA or non-numeric values detected in the p-value column. They were excluded.")
   }
 
-  # Filter data by removing NA and applying threshold
-  data_filtered <- data[!is.na(data[[p_col]]) & data[[p_col]] <= p_threshold, ]
+  # Filter valid p-values
+  data_filtered <- data[
+    !is.na(data[[p_col]]) &
+      data[[p_col]] > 0 &
+      data[[p_col]] <= p_threshold,
+  ]
 
   if (nrow(data_filtered) == 0) {
     stop("No valid P-values found within the specified threshold.")
   }
 
-  # Plot histogram using ggplot2
-  p <- ggplot(data_filtered, aes_string(x = p_col)) +
+  # -----------------------------
+  # Plot
+  # -----------------------------
+  p <- ggplot(data_filtered, aes(x = .data[[p_col]])) +
     geom_histogram(bins = bin, fill = "skyblue", color = "black") +
-    theme_bw() +
+    theme_bw(base_size = 14) +
     labs(
-      title = paste("Distribution of P-values (0 -", p_threshold, ")"),
+      title = paste("Distribution of P-values (0 –", p_threshold, ")"),
       x = "P-value",
       y = "Frequency"
     )
