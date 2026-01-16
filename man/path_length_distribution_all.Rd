@@ -19,8 +19,6 @@ path_length_distribution(
 
 \item{max}{Maximum path length to include (default: Inf).}
 
-\item{bin}{Number of bins for histogram (default: 200).}
-
 \item{output_prefix}{Prefix for saving output plots (default: "paths_length_distribution").}
 }
 \value{

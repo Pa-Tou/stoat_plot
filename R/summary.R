@@ -1,8 +1,8 @@
 #' Summary of Stoat snarl analysis
 #'
 #' @description Generate a summary of Stoat snarl output files.
-#' @importFrom utils read.table
-#' @importFrom stats p.adjust
+#' @importFrom utils read.table head write.table
+#' @importFrom stats p.adjust aggregate ecdf median qchisq setNames
 #'
 #' @param pvalue_file Stoat snarl analysis file path (snarl gwas analyse) [string].
 #' @param number_top_var Number of top variant print in the output top variant file [string].

@@ -17,11 +17,17 @@ manhattan_plot(
 \arguments{
 \item{input}{Path to the input GWAS TSV file.}
 
-\item{p_threshold}{P-value threshold for the horizontal significance line.}
+\item{p_column}{Column name to use for p-values (default: "P").}
+
+\item{chr}{Optional column name for chromosome (default: NULL, will try "CHR").}
+
+\item{start}{Optional column name for start positions (default: NULL, will try "START_OFFSET").}
+
+\item{end}{Optional column name for end positions (default: NULL, will try "END_OFFSET").}
+
+\item{p_threshold}{P-value threshold for the horizontal significance line (default: 1e-5).}
 
 \item{output}{Path to save the output plot image.}
-
-\item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 }
 \value{
 Saves a Manhattan plot to the specified file.

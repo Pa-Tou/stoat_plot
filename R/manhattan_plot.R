@@ -2,7 +2,7 @@
 #' @description Generate Manhattan plots from STOAT GWAS results (keeps CHR names like 'chr1', 'chrX', etc.)
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_hline scale_color_manual scale_x_continuous labs theme_bw theme element_blank element_text ggsave
-#' @importFrom utils read.table
+#' @importFrom utils read.table head write.table
 #'
 #' @param input Path to the input GWAS TSV file.
 #' @param output Path to save the output plot image.
