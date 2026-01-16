@@ -51,7 +51,7 @@ path_length_distribution <- function(input, min = 0, max = Inf, output = "path_l
               color = "cadetblue3", size = 3, alpha = 0.7) +
     # ECDF line scaled to frequency
     geom_line(data = ecdf_df, aes(x = Path_Length, y = Cumulative_scaled), 
-              color = "darkcyan", size = 1) +
+              color = "darkcyan", linewidth = 1) +
     scale_y_continuous(
       name = "Frequency",
       sec.axis = sec_axis(~./max_freq, name = "Cumulative Proportion")
@@ -69,6 +69,21 @@ path_length_distribution <- function(input, min = 0, max = Inf, output = "path_l
       axis.text = element_text(color = "black", size = 12),
       panel.grid.minor = element_blank()
   )
+
+  # Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+  # i Please use `linewidth` instead.
+  # Backtrace:
+  #     ▆
+  #   1. ├─testthat::expect_error(...) at test.R:14:3
+  #   2. │ └─testthat:::expect_condition_matching(...)
+  #   3. │   └─testthat:::quasi_capture(...)
+  #   4. │     ├─testthat (local) .capture(...)
+  #   5. │     │ └─base::withCallingHandlers(...)
+  #   6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  #   7. └─StoatPlot::path_length_distribution("../../data/snarl_paths/binary_snarl_analyse.tsv")
+  #   8.   └─ggplot2::geom_line(...) at stoat_plot/R/paths_plot.R:48:3
+  #   9.     └─ggplot2::layer(...)
+  # 10.       └─ggplot2:::deprecate_warn0(...)
 
   # Save plot
   ggsave(output, plot = p, width = 8, height = 5)
