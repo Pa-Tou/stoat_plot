@@ -3,6 +3,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_hline scale_color_manual scale_x_continuous labs theme_bw theme element_blank element_text ggsave
 #' @importFrom utils read.table head write.table
+#' @inportFrom stats aggregate
 #'
 #' @param input Path to the input GWAS TSV file.
 #' @param p_column Column name to use for p-values (default: "P").
