@@ -2,27 +2,27 @@
 #'
 #' @description Generate a summary of Stoat snarl output files.
 #' @importFrom utils read.table head write.table
-#' @importFrom stats p.adjust aggregate ecdf median qchisq setNames
+#' @importFrom stats p.adjust median qchisq setNames
 #'
-#' @param pvalue_file Stoat snarl analysis file path (snarl gwas analyse) [string].
+#' @param input Stoat snarl analysis file path (snarl gwas analyse) [string].
 #' @param number_top_var Number of top variant print in the output top variant file [string].
-#' @param output_file_top_var Path/Name of the top variant output file [string].
+#' @param output Path/Name of the top variant output file [string] (default : "top_variant.tsv").
 #' @param p_sig P-value threshold [numeric].
 #'
 #' @name summary_stoat
 #' @export
 
-summary_stoat <- function(pvalue_file, number_top_var=100, output_file_top_var="top_variant.tsv", p_sig=1e-5) {
+summary_stoat <- function(input, number_top_var=100, output="top_variant.tsv", p_sig=1e-5) {
 
     ## ---------------------------
     ## Input sanity checks
     ## ---------------------------
-    if (is.null(pvalue_file) || !file.exists(pvalue_file)) stop("pvalue_file must be provided and exist.")
+    if (is.null(input) || !file.exists(input)) stop("input must be provided and exist.")
     if (!is.numeric(number_top_var) || number_top_var <= 0) stop("number_top_var must be positive numeric.")
     if (!is.numeric(p_sig) || p_sig > 1 || p_sig <= 0) stop("p_sig must be >0 and <=1.")
 
     summary <- list()
-    lines <- readLines(pvalue_file)
+    lines <- readLines(input)
 
     ## ---------------------------
     ## Extract header information
@@ -308,7 +308,7 @@ summary_stoat <- function(pvalue_file, number_top_var=100, output_file_top_var="
 
     # Save to file
     write.table(df_top[, cols_to_save, drop = FALSE], 
-                file = output_file_top_var, sep = "\t",
+                file = output, sep = "\t",
                 quote = FALSE, row.names = FALSE)
-    cat(sprintf("The %d Top variants saved to: %s\n", number_top_var, output_file_top_var))
+    cat(sprintf("The %d Top variants saved to: %s\n", number_top_var, output))
 }

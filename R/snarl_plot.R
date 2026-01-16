@@ -11,6 +11,7 @@
 #' @return Saves a histogram plot to the specified file.
 #' @name snarl_type_histogram
 #' @export
+
 snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
 
   df <- read.table(input, header = TRUE)

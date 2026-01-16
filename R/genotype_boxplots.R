@@ -3,6 +3,7 @@
 #'
 #' @importFrom dplyr mutate filter select all_of left_join group_by summarise n
 #' @importFrom tidyr pivot_longer
+#' @importFrom tidyselect everything
 #' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot labs theme_bw ggsave geom_abline
 #' @importFrom magrittr %>%
 #' @importFrom utils read.table
@@ -11,7 +12,6 @@
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
 #' @param node_start Node start boundary of the snarl [string]
 #' @param node_end Snarl end boundary of the snarl [string]
-
 #' @param output Path/Name to save the output plot image.
 #'
 #' @return Saves a genotype boxplots to the specified file.

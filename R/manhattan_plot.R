@@ -5,12 +5,12 @@
 #' @importFrom utils read.table head write.table
 #'
 #' @param input Path to the input GWAS TSV file.
-#' @param output Path to save the output plot image.
 #' @param p_column Column name to use for p-values (default: "P").
 #' @param chr Optional column name for chromosome (default: NULL, will try "CHR").
 #' @param start Optional column name for start positions (default: NULL, will try "START_OFFSET").
 #' @param end Optional column name for end positions (default: NULL, will try "END_OFFSET").
 #' @param p_threshold P-value threshold for the horizontal significance line (default: 1e-5).
+#' @param output Path to save the output plot image.
 #'
 #' @return Saves a Manhattan plot to the specified file.
 #' @name manhattan_plot

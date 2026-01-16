@@ -5,16 +5,14 @@
 #' @importFrom utils read.table
 #' 
 #' @param input Path to the input TSV file (must contain a column named 'P').
-#' @param output Filename for the output PNG plot (default: "qq_plot.png").
 #' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
+#' @param output Filename for the output PNG plot (default: "qq_plot.png").
 #'
 #' @return Saves a Q-Q plot image.
 #' @name qq_plot
 #' @export
 
 qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
-
-  library(ggplot2)
 
   # Read all lines
   lines <- readLines(input)

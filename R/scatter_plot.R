@@ -7,9 +7,9 @@
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline theme_minimal scale_y_log10
 #' @importFrom utils read.table
 #' 
-#' @param input_file   Path to input file (.txt or .gz), tab-separated. Header is expected.
-#' @param out_file     Path to save the output image (e.g., "output.png").
-#' @param title        Plot title (default: "Title").
+#' @param input        Path to input file (.txt or .gz), tab-separated. Header is expected.
+#' @param output       Path to save the output image (e.g., "scatter_plot.png").
+#' @param title        Plot title (default: "Scatter plot").
 #' @param x_label      Label for the x-axis (default: column name from file).
 #' @param y_label      Label for the y-axis (default: column name from file).
 #' @param x_col        Index (0-based) of the x-axis column (default: 0).
@@ -24,9 +24,9 @@
 #' @export
 
 scatter_plot <- function(
-  input_file,
-  out_file = "scatter_plot.png",
-  title = "Title",
+  input,
+  output = "scatter_plot.png",
+  title = "Scatter plot",
   x_label = "",
   y_label = "",
   x_col = 0,
@@ -36,7 +36,7 @@ scatter_plot <- function(
 
   # Read data
   data <- read.table(
-    input_file,
+    input,
     header = TRUE,
     sep = "\t",
     stringsAsFactors = FALSE,
@@ -101,5 +101,5 @@ scatter_plot <- function(
     p <- p + scale_y_log10()
   }
 
-  ggsave(out_file, plot = p, width = 12, height = 10, dpi = 400)
+  ggsave(output, plot = p, width = 12, height = 10, dpi = 400)
 }

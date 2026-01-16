@@ -1,13 +1,13 @@
 #' Path Length Distribution Plots for STOAT
 #' @description Generate multiple visualizations of path lengths from a TSV file with a `TYPE` column.
 #'
-#' @importFrom ggplot2 ggplot aes geom_point sec_axis geom_histogram stat_ecdf geom_boxplot labs theme_minimal theme element_text ggsave scale_y_log10 geom_line scale_y_continuous
+#' @importFrom ggplot2 ggplot aes geom_point sec_axis labs theme_minimal theme element_text ggsave geom_line scale_y_continuous
 #' @importFrom utils read.table
 #'
 #' @param input Path to the input TSV file.
 #' @param min Minimum path length to include (default: 0).
 #' @param max Maximum path length to include (default: Inf).
-#' @param output_prefix Prefix for saving output plots (default: "paths_length_distribution").
+#' @param output Path to the output plot (default: "path_length_dot_ecdf.png").
 #'
 #' @return Saves four plots: dot plot, histogram, ECDF, and boxplot.
 #' @name path_length_distribution_all
@@ -69,21 +69,6 @@ path_length_distribution <- function(input, min = 0, max = Inf, output = "path_l
       axis.text = element_text(color = "black", size = 12),
       panel.grid.minor = element_blank()
   )
-
-  # Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-  # i Please use `linewidth` instead.
-  # Backtrace:
-  #     ▆
-  #   1. ├─testthat::expect_error(...) at test.R:14:3
-  #   2. │ └─testthat:::expect_condition_matching(...)
-  #   3. │   └─testthat:::quasi_capture(...)
-  #   4. │     ├─testthat (local) .capture(...)
-  #   5. │     │ └─base::withCallingHandlers(...)
-  #   6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
-  #   7. └─StoatPlot::path_length_distribution("../../data/snarl_paths/binary_snarl_analyse.tsv")
-  #   8.   └─ggplot2::geom_line(...) at stoat_plot/R/paths_plot.R:48:3
-  #   9.     └─ggplot2::layer(...)
-  # 10.       └─ggplot2:::deprecate_warn0(...)
 
   # Save plot
   ggsave(output, plot = p, width = 8, height = 5)

@@ -2,6 +2,7 @@
 #' @description Generate histogram of P-values from STOAT GWAS results TSV.
 #'
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline aes_string geom_histogram
+#' @importFrom rlang .data
 #' @importFrom utils read.table
 #' 
 #' @param input Path to input TSV file.
