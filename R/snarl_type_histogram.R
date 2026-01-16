@@ -54,7 +54,7 @@ snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
   print(variant_counts)
 
   # ----------------- PLOT -----------------
-  plot <- ggplot(variant_counts, aes(x = Variant_Type, y = Count, fill = Variant_Type)) +
+  plot <- ggplot(variant_counts, aes(x = variant_counts$Variant_Type, y = variant_counts$Count, fill = variant_counts$Variant_Type)) +
     geom_bar(
       stat = "identity",
       position = "stack",

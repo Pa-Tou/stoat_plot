@@ -3,7 +3,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_hline scale_color_manual scale_x_continuous labs theme_bw theme element_blank element_text ggsave
 #' @importFrom utils read.table head write.table
-#' @inportFrom stats aggregate
+#' @importFrom stats aggregate
 #'
 #' @param input Path to the input GWAS TSV file.
 #' @param p_column Column name to use for p-values (default: "P").
@@ -139,9 +139,9 @@ manhattan_plot <- function(input,
   # -----------------------------
   # Plot
   # -----------------------------
-  p <- ggplot(data, aes(x = xpos, y = logp)) +
+  p <- ggplot(data, aes(x = data$xpos, y = data$logp)) +
     geom_point(
-      aes(color = CHR),
+      aes(color = data$CHR),
       alpha = 0.6,
       size = 0.7
     ) +

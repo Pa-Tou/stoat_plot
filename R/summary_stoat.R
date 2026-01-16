@@ -5,14 +5,14 @@
 #' @importFrom stats p.adjust median qchisq setNames
 #'
 #' @param input Stoat snarl analysis file path (snarl gwas analyse) [string].
-#' @param number_top_var Number of top variant print in the output top variant file [string].
+#' @param number_top_var Number of top variant print in the output top variant file [string] (default : 100).
+#' @param p_sig P-value threshold [numeric] (default : 1e-5).
 #' @param output Path/Name of the top variant output file [string] (default : "top_variant.tsv").
-#' @param p_sig P-value threshold [numeric].
 #'
 #' @name summary_stoat
 #' @export
 
-summary_stoat <- function(input, number_top_var=100, output="top_variant.tsv", p_sig=1e-5) {
+summary_stoat <- function(input, number_top_var=100, p_sig=1e-5, output="top_variant.tsv") {
 
     ## ---------------------------
     ## Input sanity checks
@@ -256,24 +256,24 @@ summary_stoat <- function(input, number_top_var=100, output="top_variant.tsv", p
     ## Variant type per chromosome
     ## ---------------------------
     if (!is.null(summary$variant_table)) {
-        
         chr_names <- unique(summary$variant_table$CHR)
         types <- c("SNP", "MNP", "SV")  # fixed order
-        
+
         for (vt in types) {
+
         # Filter table for this variant type
-        df_vt <- subset(summary$variant_table, VARIANT_TYPE == vt)
+        df_vt <- subset(summary$variant_table, summary$variant_table$VARIANT_TYPE == vt)
         if (nrow(df_vt) == 0) next  # skip if no variant of this type
-        
+
         # Total per chromosome
         total_chr <- table(factor(df_vt$CHR, levels = chr_names))
-        
+
         # Raw P < threshold
         p_chr <- table(factor(df_vt$CHR[df_vt$P < p_sig], levels = chr_names))
-        
+
         # BH P < threshold
         bh_chr <- table(factor(df_vt$CHR[df_vt$P_BH < p_sig], levels = chr_names))
-        
+
         # Combine into one data.frame
         vt_chr_summary <- data.frame(
             Chromosome = chr_names,
@@ -283,7 +283,7 @@ summary_stoat <- function(input, number_top_var=100, output="top_variant.tsv", p
             check.names = FALSE,
             stringsAsFactors = FALSE
         )
-        
+
         cat(sprintf("Variant Type: %s per Chromosome (Threshold: P < %.1e)\n", vt, p_sig))
         print(vt_chr_summary, row.names = FALSE)
         cat("\n")

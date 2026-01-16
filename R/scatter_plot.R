@@ -70,9 +70,9 @@ scatter_plot <- function(
   df$group_label <- paste0(df$group, ": ", group_counts[df$group])
 
   # Build the plot
-  p <- ggplot(df, aes(x = x, y = y)) +
+  p <- ggplot(df, aes(x = df$x, y = df$y)) +
     geom_point(
-      aes(color = group_label),
+      aes(color = df$group_label),
       alpha = 0.7,
       size = 2
     ) +

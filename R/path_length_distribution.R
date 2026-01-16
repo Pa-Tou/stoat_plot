@@ -48,17 +48,17 @@ path_length_distribution <- function(input, min = 0, max = Inf, output = "path_l
   # ----------------- Combined Plot -----------------
   p <- ggplot() +
     # Dot plot for frequency
-    geom_point(data = freq_df, aes(x = Path_Length, y = Frequency), 
+    geom_point(data = freq_df, aes(x = freq_df$Path_Length, y = freq_df$Frequency), 
               color = "cadetblue3", size = 3, alpha = 0.7) +
     # ECDF line scaled to frequency
-    geom_line(data = ecdf_df, aes(x = Path_Length, y = Cumulative_scaled), 
+    geom_line(data = ecdf_df, aes(x = freq_df$Path_Length, y = ecdf_df$Cumulative_scaled), 
               color = "darkcyan", linewidth = 1) +
     scale_y_continuous(
       name = "Frequency",
       sec.axis = sec_axis(~./max_freq, name = "Cumulative Proportion")
     ) +
     labs(
-      title = paste0("Path Length Distribution & ECDF (", min, " – ", max, ")"),
+      title = paste0("Path Length Distribution & ECDF (", min, " - ", max, ")"),
       x = "Path Length"
     ) +
     theme_minimal(base_size = 14) +

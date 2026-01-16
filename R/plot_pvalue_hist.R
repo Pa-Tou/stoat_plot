@@ -97,7 +97,7 @@ plot_pvalue_hist <- function(input,
       panel.grid.minor = element_blank()
     ) +
     labs(
-      title = paste0("Distribution of P-values (", min, " – ", max, ")"),
+      title = paste0("Distribution of P-values (", min, " - ", max, ")"),
       x = "P-value",
       y = "Frequency"
     )

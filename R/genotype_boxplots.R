@@ -7,7 +7,7 @@
 #' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot labs theme_bw ggsave geom_abline
 #' @importFrom magrittr %>%
 #' @importFrom utils read.table
-#' 
+#'
 #' @param genotype_file Genotype file output of stoat vcf/graph
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
 #' @param node_start Node start boundary of the snarl [string]
@@ -67,12 +67,12 @@ genotype_boxplots <- function(genotype_file,
   # Create snarl ID
   # -----------------------------
   geno_data <- geno_data %>%
-    mutate(SNARL_ID = paste0(START_NODE, END_NODE))
+    mutate(SNARL_ID = paste0(.data$START_NODE, .data$END_NODE))
 
   target_snarl <- paste0(node_start, node_end)
 
   geno_data <- geno_data %>%
-    filter(SNARL_ID == target_snarl)
+    filter(.data$SNARL_ID == target_snarl)
 
   if (nrow(geno_data) == 0) {
     stop(sprintf("snarl_id %s not found in genotype file", target_snarl))
@@ -137,23 +137,23 @@ genotype_boxplots <- function(genotype_file,
 
   merged_data <- geno_long %>%
     left_join(pheno_data, by = "IID") %>%
-    filter(!is.na(PHENO))
+    filter(!is.na(.data$PHENO))
 
   # -----------------------------
   # Count genotypes
   # -----------------------------
   genotype_counts <- merged_data %>%
-    group_by(GT) %>%
+    group_by(.data$GT) %>%
     summarise(count = n(), .groups = "drop")
 
   merged_data <- merged_data %>%
     left_join(genotype_counts, by = "GT") %>%
-    mutate(Genotype = paste0(GT, "\n(", count, ")"))
+    mutate(Genotype = paste0(.data$GT, "\n(", .data$count, ")"))
 
   # -----------------------------
   # Plot
   # -----------------------------
-  p <- ggplot(merged_data, aes(x = Genotype, y = PHENO)) +
+  p <- ggplot(merged_data, aes(x = .data$Genotype, y = .data$PHENO)) +
     geom_violin(fill = "cadetblue3", alpha = 0.3) +
     geom_boxplot(
       width = 0.2,
@@ -183,3 +183,16 @@ genotype_boxplots <- function(genotype_file,
 
   message("Saved plot: ", output)
 }
+
+# ❯ checking R code for possible problems ... NOTE
+#   genotype_boxplots: no visible binding for global variable ‘START_NODE’
+#   genotype_boxplots: no visible binding for global variable ‘END_NODE’
+#   genotype_boxplots: no visible binding for global variable ‘SNARL_ID’
+#   genotype_boxplots: no visible binding for global variable ‘PHENO’
+#   genotype_boxplots: no visible binding for global variable ‘GT’
+#   genotype_boxplots: no visible binding for global variable ‘count’
+#   genotype_boxplots: no visible binding for global variable ‘Genotype’
+#   snarl_type_histogram: no visible binding for global variable
+#     ‘Variant_Type’
+#   Undefined global functions or variables:
+#     END_NODE GT Genotype PHENO SNARL_ID START_NODE Variant_Type count

@@ -3,7 +3,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
 #' @importFrom utils read.table
-#' 
+#'
 #' @param input Path to the input TSV file (must contain a column named 'P').
 #' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
 #' @param output Filename for the output PNG plot (default: "qq_plot.png").
@@ -68,7 +68,7 @@ qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
   lambda <- median(chisq, na.rm = TRUE) / qchisq(0.5, df = 1)
 
   # Plot
-  p <- ggplot(plot_df, aes(Expected, Observed)) +
+  p <- ggplot(plot_df, aes(plot_df$Expected, plot_df$Observed)) +
     geom_point(
       size = 1.5,
       color = "cadetblue3",
@@ -82,7 +82,7 @@ qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
     ) +
     labs(
       title = "QQ Plot",
-      subtitle = paste0("Genomic inflation factor (λ) = ", round(lambda, 3)),
+      subtitle = paste0("Genomic inflation factor = ", round(lambda, 3)),
       x = "Expected -log10(P)",
       y = "Observed -log10(P)"
     ) +
