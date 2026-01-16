@@ -24,13 +24,13 @@ jobs:
             "covr",
             "ggplot2",
             "dplyr",
-            "tools",
-            "tidyr",
-            "utils"
+            "tidyr"
           ))
 
       - name: Install package
-        run: R CMD build . && R CMD INSTALL StoatPlot_*.tar.gz
+        run: |
+          R CMD build .
+          R CMD INSTALL StoatPlot_*.tar.gz
 
       - name: Run tests
         run: Rscript -e 'library(testthat); test_dir("tests/testthat")'
