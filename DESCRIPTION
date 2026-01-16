@@ -10,7 +10,9 @@ Imports:
     ggplot2,
     dplyr,
     tidyr,
-    tools
+    magrittr,
+    utils,
+    stats
 RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
