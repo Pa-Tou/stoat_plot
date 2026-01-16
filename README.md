@@ -69,29 +69,42 @@ devtools::install_github("Pa-Tou/stoat_plot")
 devtools::install()
 library(StoatPlot)
 
-# Print summary 
-summary_stoat("data/gwas/pg.gwas.tsv")
+# Define path to package test data
+test_data_dir <- system.file("extdata", package = "StoatPlot")
 
-# Manhattan plot 
-manhattan_plot("data/gwas/pg.gwas.tsv")
+# Print summary
+summary_stoat(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
+
+# Manhattan plot
+manhattan_plot(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
 
 # Q-Q plot
-qq_plot("data/gwas/pg.gwas.tsv")
+qq_plot(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
 
 # Histogram of p-values
-plot_pvalue_hist("data/gwas/pg.gwas.tsv", min=0.00001, max=0.5)
+plot_pvalue_hist(
+  file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
+  min = 0.00001,
+  max = 0.5
+)
 
-# Boxplot of phenotype/genotype for all regression table represent in a dir
-genotype_boxplots("data/genotype/pg.snarl.tsv", "data/phenotype/binary_phenotype_samples.tsv", "<4271", ">4260", output = "boxplots.jpeg")
+# Boxplot of phenotype/genotype for all regression tables
+genotype_boxplots(
+  file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
+  file.path(test_data_dir, "phenotype", "binary_phenotype_samples.tsv"),
+  "<4271",
+  ">4260",
+  output = "boxplots.jpeg"
+)
 
-# Dot Plot of Path Length Frequencies
-path_length_distribution("data/snarl_paths/binary_snarl_analyse.tsv")
+# Dot plot of Path Length Frequencies
+path_length_distribution(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
 
-# Create a histogram plot
-snarl_type_histogram("data/snarl_paths/binary_snarl_analyse.tsv")
+# Snarl type histogram
+snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
 
-# Create a scatter plot
-scatter_plot("data/snarl_paths/binary_snarl_analyse.tsv")
+# Scatter plot
+scatter_plot(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
 ```
 
 ---

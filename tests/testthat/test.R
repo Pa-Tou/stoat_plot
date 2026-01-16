@@ -1,8 +1,10 @@
+# devtools::test()
+
 library(testthat)
 library(StoatPlot)
 
-# Define the path to test data relative to the package root
-test_data_dir <- "data"
+# Define the path to test data inside the package
+test_data_dir <- system.file("extdata", package = "StoatPlot")
 
 test_that("StoatPlot main functions run without errors", {
 
