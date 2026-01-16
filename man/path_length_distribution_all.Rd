@@ -19,7 +19,7 @@ path_length_distribution(
 
 \item{max}{Maximum path length to include (default: Inf).}
 
-\item{output_prefix}{Prefix for saving output plots (default: "paths_length_distribution").}
+\item{output}{Path to the output plot (default: "path_length_dot_ecdf.png").}
 }
 \value{
 Saves four plots: dot plot, histogram, ECDF, and boxplot.

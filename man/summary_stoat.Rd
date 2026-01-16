@@ -5,18 +5,18 @@
 \title{Summary of Stoat snarl analysis}
 \usage{
 summary_stoat(
-  pvalue_file,
+  input,
   number_top_var = 100,
-  output_file_top_var = "top_variant.tsv",
+  output = "top_variant.tsv",
   p_sig = 1e-05
 )
 }
 \arguments{
-\item{pvalue_file}{Stoat snarl analysis file path (snarl gwas analyse) [string].}
+\item{input}{Stoat snarl analysis file path (snarl gwas analyse) [string].}
 
 \item{number_top_var}{Number of top variant print in the output top variant file [string].}
 
-\item{output_file_top_var}{Path/Name of the top variant output file [string].}
+\item{output}{Path/Name of the top variant output file [string] (default : "top_variant.tsv").}
 
 \item{p_sig}{P-value threshold [numeric].}
 }

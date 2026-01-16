@@ -5,9 +5,9 @@
 \title{Scatter Plot from Tab-Separated File}
 \usage{
 scatter_plot(
-  input_file,
-  out_file = "scatter_plot.png",
-  title = "Title",
+  input,
+  output = "scatter_plot.png",
+  title = "Scatter plot",
   x_label = "",
   y_label = "",
   x_col = 0,
@@ -17,11 +17,11 @@ scatter_plot(
 )
 }
 \arguments{
-\item{input_file}{Path to input file (.txt or .gz), tab-separated. Header is expected.}
+\item{input}{Path to input file (.txt or .gz), tab-separated. Header is expected.}
 
-\item{out_file}{Path to save the output image (e.g., "output.png").}
+\item{output}{Path to save the output image (e.g., "scatter_plot.png").}
 
-\item{title}{Plot title (default: "Title").}
+\item{title}{Plot title (default: "Scatter plot").}
 
 \item{x_label}{Label for the x-axis (default: column name from file).}
 
