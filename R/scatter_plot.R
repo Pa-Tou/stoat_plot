@@ -71,20 +71,35 @@ scatter_plot <- function(
 
   # Build the plot
   p <- ggplot(df, aes(x = x, y = y)) +
-    geom_point(aes(color = group_label), alpha = 0.7) +
+    geom_point(
+      aes(color = group_label),
+      alpha = 0.7,
+      size = 2
+    ) +
     labs(
       title = title,
       x = x_label,
       y = y_label,
       color = if (!is.null(color_name)) paste0(color_name, ": count") else NULL
     ) +
-    theme_minimal()
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(color = "black"),
+      panel.grid.minor = element_blank()
+    ) +
+    scale_color_manual(
+      values = rep(
+        c("cadetblue3", "darkcyan"),
+        length.out = length(unique(df$group_label))
+      )
+    )
 
   # Apply log scale to y-axis if needed
   if (log_y) {
     p <- p + scale_y_log10()
   }
 
-  # Save plot
   ggsave(out_file, plot = p, width = 12, height = 10, dpi = 400)
 }

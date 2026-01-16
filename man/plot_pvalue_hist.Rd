@@ -6,9 +6,10 @@
 \usage{
 plot_pvalue_hist(
   input,
-  column_names = "",
-  p_threshold = 0.1,
-  bin = 200,
+  column_names = "P",
+  min = 0,
+  max = 1,
+  bin = 100,
   output = "pvalue_distribution_plot.png"
 )
 }
@@ -17,7 +18,9 @@ plot_pvalue_hist(
 
 \item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 
-\item{p_threshold}{Maximum P-value threshold to include in the plot (default: 0.1).}
+\item{min}{Minimun P-value threshold to include in the plot (default: 0).}
+
+\item{max}{Maximum P-value threshold to include in the plot (default: 1.0).}
 
 \item{bin}{Number of bins in the histogram (default: 200).}
 

@@ -1,47 +1,76 @@
-#' Dot Plot of Path Length Frequencies
-#' @description Create a dot plot from a TSV file containing a `path_length` column.
-#' 
-#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
-#' @importFrom utils read.table
-#' 
-#' @param input Path to the input TSV file.
-#' @param output Path to save the output plot image.
+#' Path Length Distribution Plots for STOAT
+#' @description Generate multiple visualizations of path lengths from a TSV file with a `TYPE` column.
 #'
-#' @return Saves a dot plot to the specified file.
-#' @name path_length_distribution
+#' @importFrom ggplot2 ggplot aes geom_point sec_axis geom_histogram stat_ecdf geom_boxplot labs theme_minimal theme element_text ggsave scale_y_log10 geom_line scale_y_continuous
+#' @importFrom utils read.table
+#'
+#' @param input Path to the input TSV file.
+#' @param min Minimum path length to include (default: 0).
+#' @param max Maximum path length to include (default: Inf).
+#' @param output_prefix Prefix for saving output plots (default: "paths_length_distribution").
+#'
+#' @return Saves four plots: dot plot, histogram, ECDF, and boxplot.
+#' @name path_length_distribution_all
 #' @export
 
-path_length_distribution <- function(input, output="paths_length_distribution.png") {
+path_length_distribution <- function(input, min = 0, max = Inf, output = "path_length_dot_ecdf.png") {
 
   # Read input
   df <- read.table(input, header = TRUE)
+  if (!"TYPE" %in% colnames(df)) stop("Column 'TYPE' not found in data.")
 
-  if (!"TYPE" %in% colnames(df)) {
-    stop("Column 'TYPE' not found in the data.")
-  }
-
-  # Split and flatten all TYPE values
+  # Flatten path lengths
   all_values <- unlist(sapply(as.character(df$TYPE), function(x) {
-    vals <- unlist(strsplit(x, "[,/]+"))   # split on ',' & '/'
-    as.numeric(vals)                       # convert all to numeric
+    vals <- unlist(strsplit(x, "[,/]+"))
+    as.numeric(vals)
   }))
+  
+  # Filter by min/max
+  all_values <- all_values[!is.na(all_values) & all_values >= min & all_values <= max]
+  if (length(all_values) == 0) stop("No path lengths within the specified range.")
 
-  # Create data frame with counts
+  # Compute frequency table
   freq_df <- as.data.frame(table(all_values))
   colnames(freq_df) <- c("Path_Length", "Frequency")
   freq_df$Path_Length <- as.numeric(as.character(freq_df$Path_Length))
+  
+  # Compute ECDF
+  ecdf_df <- data.frame(
+    Path_Length = sort(unique(all_values)),
+    Cumulative = ecdf(all_values)(sort(unique(all_values)))
+  )
 
-  # ----------------- PLOT -----------------
-  plot <- ggplot(freq_df, aes(x = Path_Length, y = Frequency)) +
-    geom_point(size = 3, color = "steelblue") +
-    labs(
-      title = "Dot Plot of Path Length Frequency",
-      x = "Path Length",
-      y = "Frequency"
+  # Scale ECDF to match frequency range for secondary axis
+  max_freq <- max(freq_df$Frequency)
+  ecdf_df$Cumulative_scaled <- ecdf_df$Cumulative * max_freq
+
+  # ----------------- Combined Plot -----------------
+  p <- ggplot() +
+    # Dot plot for frequency
+    geom_point(data = freq_df, aes(x = Path_Length, y = Frequency), 
+              color = "cadetblue3", size = 3, alpha = 0.7) +
+    # ECDF line scaled to frequency
+    geom_line(data = ecdf_df, aes(x = Path_Length, y = Cumulative_scaled), 
+              color = "darkcyan", size = 1) +
+    scale_y_continuous(
+      name = "Frequency",
+      sec.axis = sec_axis(~./max_freq, name = "Cumulative Proportion")
     ) +
-    theme_bw() +
-    theme(text = element_text(size = 14))
+    labs(
+      title = paste0("Path Length Distribution & ECDF (", min, " – ", max, ")"),
+      x = "Path Length"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      axis.title.y.left = element_text(color = "cadetblue3", face = "bold"),
+      axis.title.y.right = element_text(color = "darkcyan", face = "bold"),
+      axis.title.x = element_text(face = "bold"),
+      axis.text = element_text(color = "black", size = 12),
+      panel.grid.minor = element_blank()
+  )
 
   # Save plot
-  ggsave(output, plot, width = 6, height = 4)
+  ggsave(output, plot = p, width = 8, height = 5)
+
 }

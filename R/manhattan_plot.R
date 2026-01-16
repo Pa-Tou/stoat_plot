@@ -1,13 +1,16 @@
 #' Manhattan Plot for GWAS Results
 #' @description Generate Manhattan plots from STOAT GWAS results (keeps CHR names like 'chr1', 'chrX', etc.)
 #'
-#' @importFrom ggplot2 ggplot aes geom_point geom_hline scale_color_manual scale_x_continuous labs theme_bw theme element_blank element_text ggsave geom_abline
+#' @importFrom ggplot2 ggplot aes geom_point geom_hline scale_color_manual scale_x_continuous labs theme_bw theme element_blank element_text ggsave
 #' @importFrom utils read.table
 #'
 #' @param input Path to the input GWAS TSV file.
 #' @param output Path to save the output plot image.
-#' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
-#' @param p_threshold P-value threshold for the horizontal significance line.
+#' @param p_column Column name to use for p-values (default: "P").
+#' @param chr Optional column name for chromosome (default: NULL, will try "CHR").
+#' @param start Optional column name for start positions (default: NULL, will try "START_OFFSET").
+#' @param end Optional column name for end positions (default: NULL, will try "END_OFFSET").
+#' @param p_threshold P-value threshold for the horizontal significance line (default: 1e-5).
 #'
 #' @return Saves a Manhattan plot to the specified file.
 #' @name manhattan_plot
@@ -136,28 +139,42 @@ manhattan_plot <- function(input,
   # Plot
   # -----------------------------
   p <- ggplot(data, aes(x = xpos, y = logp)) +
-    geom_point(aes(color = CHR), alpha = 0.6, size = 0.7) +
-    geom_hline(yintercept = logp_threshold, color = "red", linetype = "dashed") +
+    geom_point(
+      aes(color = CHR),
+      alpha = 0.6,
+      size = 0.7
+    ) +
+    geom_hline(
+      yintercept = logp_threshold,
+      color = "red",
+      linetype = "dashed"
+    ) +
     labs(
       x = x_label,
       y = expression(-log[10](P)),
       title = "Manhattan Plot"
     ) +
-    theme_bw(base_size = 14) +
+    theme_minimal(base_size = 14) +
     theme(
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(color = "black"),
+      panel.grid.minor = element_blank(),
       legend.position = "none",
-      panel.border = element_blank(),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor.x = element_blank(),
       axis.text.x = element_text(angle = 90, vjust = 0.5, size = 10)
     )
 
   if (is.null(chr)) {
     p <- p +
-      scale_x_continuous(breaks = axis_df$xpos, labels = axis_df$CHR) +
+      scale_x_continuous(
+        breaks = axis_df$xpos,
+        labels = axis_df$CHR
+      ) +
       scale_color_manual(
-        values = rep(c("black", "grey50"),
-                     length.out = length(levels(data$CHR)))
+        values = rep(
+          c("cadetblue3", "darkcyan"),
+          length.out = length(levels(data$CHR))
+        )
       )
   }
 

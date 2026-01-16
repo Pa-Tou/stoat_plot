@@ -17,9 +17,9 @@ genotype_boxplots(
 
 \item{phenotype_file}{Path to the phenotype file use for the GWAS analysis.}
 
-\item{node_start}{Node start boundary of the snarl}
+\item{node_start}{Node start boundary of the snarl [string]}
 
-\item{node_end}{Snarl end boundary of the snarl}
+\item{node_end}{Snarl end boundary of the snarl [string]}
 
 \item{output}{Path/Name to save the output plot image.}
 }

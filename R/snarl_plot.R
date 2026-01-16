@@ -2,7 +2,7 @@
 #' Dot Plot of snarl type histogram
 #' @description Create a histogram plot from a TSV file containing a `path_length` column.
 #'
-#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline geom_bar
+#' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline geom_bar scale_fill_manual
 #' @importFrom utils read.table
 #' 
 #' @param input Path to the input TSV file.
@@ -54,14 +54,32 @@ snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
 
   # ----------------- PLOT -----------------
   plot <- ggplot(variant_counts, aes(x = Variant_Type, y = Count, fill = Variant_Type)) +
-    geom_bar(stat = "identity", position = "stack") +
-    labs(title = "Snarl Type Distribution",
-                  x = "Snarl Type",
-                  y = "Count") +
-    theme_bw(base_size = 14) +
-    theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
-                   legend.position = "top")
+    geom_bar(
+      stat = "identity",
+      position = "stack",
+      alpha = 0.8
+    ) +
+    labs(
+      title = "Snarl Type Distribution",
+      x = "Snarl Type",
+      y = "Count"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(color = "black"),
+      axis.text.x = element_text(angle = 0, hjust = 0.5),
+      panel.grid.minor = element_blank(),
+      legend.position = "top"
+    ) +
+    scale_fill_manual(
+      values = c(
+        SNP = "cadetblue3",
+        MNP = "darkcyan",
+        SV  = "grey60"
+      )
+    )
 
-  # Save plot
   ggsave(output, plot, width = 6, height = 4)
 }

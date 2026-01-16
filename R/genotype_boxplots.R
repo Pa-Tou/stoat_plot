@@ -167,7 +167,7 @@ genotype_boxplots <- function(genotype_file,
       x = "Genotype",
       y = "Phenotype"
     ) +
-    theme_bw(base_size = 14)
+    theme_minimal(base_size = 14)
 
   # -----------------------------
   # Save

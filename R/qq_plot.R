@@ -71,16 +71,31 @@ qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
 
   # Plot
   p <- ggplot(plot_df, aes(Expected, Observed)) +
-    geom_point(size = 1.5, color = "steelblue", alpha = 0.7) +
-    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+    geom_point(
+      size = 1.5,
+      color = "cadetblue3",
+      alpha = 0.7
+    ) +
+    geom_abline(
+      slope = 1,
+      intercept = 0,
+      linetype = "dashed",
+      color = "red"
+    ) +
     labs(
       title = "QQ Plot",
       subtitle = paste0("Genomic inflation factor (λ) = ", round(lambda, 3)),
       x = "Expected -log10(P)",
       y = "Observed -log10(P)"
     ) +
-    theme_bw(base_size = 14)
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(color = "black"),
+      panel.grid.minor = element_blank()
+    )
 
-  # Save
   ggsave(output, plot = p, width = 6, height = 6)
 }
