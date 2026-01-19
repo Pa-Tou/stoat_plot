@@ -57,6 +57,11 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       # ---- Coverage (runs once only) ----
       - name: Test coverage
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
