@@ -8,7 +8,8 @@ on:
 
 name: R-CMD-check
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   R-CMD-check:
@@ -50,6 +51,7 @@ jobs:
             ggplot2
             dplyr
             tidyr
+          needs: coverage
 
       - name: Check R package
         uses: r-lib/actions/check-r-package@v2
@@ -57,12 +59,7 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      # ---- Coverage (runs once only) ----
+      # ---- Coverage (R-native, correct) ----
       - name: Test coverage
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
         run: covr::codecov()
