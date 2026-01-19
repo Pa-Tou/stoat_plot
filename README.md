@@ -1,7 +1,6 @@
 # StoatPlot
 
-[![R-CMD-check](https://github.com/<USERNAME>/StoatPlot/workflows/R-CMD-check/badge.svg)](https://github.com/<USERNAME>/StoatPlot/actions)
-[![codecov](https://codecov.io/gh/<USERNAME>/StoatPlot/branch/main/graph/badge.svg?token=<YOUR_CODECOV_TOKEN>)](https://codecov.io/gh/<USERNAME>/StoatPlot)
+[![Codecov](https://codecov.io/gh/USER/StoatPlot/branch/main/graph/badge.svg)](https://codecov.io/gh/USER/StoatPlot)
 
 ## Overview
 

@@ -42,10 +42,23 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: devtools, roxygen2, testthat, covr, ggplot2, dplyr, tidyr
+          extra-packages: |
+            devtools
+            roxygen2
+            testthat
+            covr
+            ggplot2
+            dplyr
+            tidyr
 
       - name: Check R package
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+
+      # ---- Coverage (runs once only) ----
+      - name: Test coverage
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        run: covr::codecov()
+        shell: Rscript {0}
