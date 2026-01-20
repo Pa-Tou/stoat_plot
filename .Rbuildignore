@@ -1,9 +1,0 @@
-^\.github
-^\.git
-^\.DS_Store
-^docs$
-^Makefile$
-^node_modules$
-^install.R$
-^Dockerfile$
-^.travis.yml$

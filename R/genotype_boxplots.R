@@ -183,16 +183,3 @@ genotype_boxplots <- function(genotype_file,
 
   message("Saved plot: ", output)
 }
-
-# ❯ checking R code for possible problems ... NOTE
-#   genotype_boxplots: no visible binding for global variable ‘START_NODE’
-#   genotype_boxplots: no visible binding for global variable ‘END_NODE’
-#   genotype_boxplots: no visible binding for global variable ‘SNARL_ID’
-#   genotype_boxplots: no visible binding for global variable ‘PHENO’
-#   genotype_boxplots: no visible binding for global variable ‘GT’
-#   genotype_boxplots: no visible binding for global variable ‘count’
-#   genotype_boxplots: no visible binding for global variable ‘Genotype’
-#   snarl_type_histogram: no visible binding for global variable
-#     ‘Variant_Type’
-#   Undefined global functions or variables:
-#     END_NODE GT Genotype PHENO SNARL_ID START_NODE Variant_Type count

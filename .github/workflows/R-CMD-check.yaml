@@ -1,12 +1,12 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # For StoatPlot R package
 
+name: R-CMD-check
+
 on:
   push:
     branches: [ main ]
   pull_request:
-
-name: R-CMD-check
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ permissions:
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (${{ matrix.config.r })
     strategy:
       fail-fast: false
       matrix:
@@ -59,8 +59,14 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
-      # ---- Coverage (R-native, correct) ----
-      - name: Test coverage
+      - name: Generate coverage (Linux + release only)
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
-        run: covr::codecov()
-        shell: Rscript {0}
+        run: |
+          Rscript -e 'covr::to_cobertura()'
+
+      - name: Upload coverage to Codecov
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        uses: codecov/codecov-action@v4
+        with:
+          files: cobertura.xml
+          fail_ci_if_error: true

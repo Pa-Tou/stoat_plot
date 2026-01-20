@@ -94,7 +94,7 @@ plot_pvalue_hist(
 # Boxplot of phenotype/genotype for all regression tables
 genotype_boxplots(
   file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
-  file.path(test_data_dir, "phenotype", "binary_phenotype_samples.tsv"),
+  file.path(test_data_dir, "phenotype", "quantitative_phenotype_samples.tsv"),
   "<4271",
   ">4260",
   output = "boxplots.jpeg"
