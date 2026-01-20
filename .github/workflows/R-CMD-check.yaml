@@ -62,7 +62,7 @@ jobs:
       - name: Generate coverage (Linux + release only)
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
         run: |
-          Rscript -e 'covr::to_cobertura()'
+          Rscript -e 'covr::to_cobertura(covr::package_coverage(type = "tests"))'
 
       - name: Upload coverage to Codecov
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
