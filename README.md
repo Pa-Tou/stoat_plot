@@ -70,11 +70,21 @@ devtools::install_github("Pa-Tou/stoat_plot")
 ## Example Usage
 
 ```r
+devtools::document()
 devtools::install()
 library(StoatPlot)
 
 # Define path to package test data
 test_data_dir <- system.file("extdata", package = "StoatPlot")
+
+# Boxplot of phenotype/genotype for all regression tables
+genotype_boxplots(
+  file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
+  file.path(test_data_dir, "phenotype", "quantitative_phenotype_samples.tsv"),
+  "<4252",
+  ">4249",
+  output = "boxplots.jpeg"
+)
 
 # Print summary
 summary_stoat(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
@@ -90,15 +100,6 @@ plot_pvalue_hist(
   file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
   min = 0.00001,
   max = 0.5
-)
-
-# Boxplot of phenotype/genotype for all regression tables
-genotype_boxplots(
-  file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
-  file.path(test_data_dir, "phenotype", "quantitative_phenotype_samples.tsv"),
-  "<4271",
-  ">4260",
-  output = "boxplots.jpeg"
 )
 
 # Dot plot of Path Length Frequencies

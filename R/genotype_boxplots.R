@@ -1,13 +1,14 @@
 #' Genotype boxplots for STOAT GWAS Results
 #' @description Generates boxplots of phenotype by inferred genotype.
 #'
-#' @importFrom dplyr mutate filter select all_of left_join group_by summarise n
+#' @importFrom dplyr mutate filter select all_of left_join group_by summarise n na_if across
 #' @importFrom tidyr pivot_longer
 #' @importFrom tidyselect everything
 #' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot labs theme_bw ggsave geom_abline
 #' @importFrom magrittr %>%
 #' @importFrom utils read.table
-#'
+#' @importFrom rlang .data
+#' 
 #' @param genotype_file Genotype file output of stoat vcf/graph
 #' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
 #' @param node_start Node start boundary of the snarl [string]
@@ -102,15 +103,22 @@ genotype_boxplots <- function(genotype_file,
   # Convert to long format
   # -----------------------------
   geno_long <- geno_data %>%
-    select(all_of(genotype_columns)) %>%
+    mutate(across(all_of(genotype_columns), as.character)) %>%
     pivot_longer(
-      cols = everything(),
+      cols = all_of(genotype_columns),
       names_to = "IID",
       values_to = "GT"
-    )
+    ) %>%
+    mutate(
+      GT = na_if(.data$GT, "."),
+      GT = as.numeric(.data$GT)
+    ) %>%
+    filter(!is.na(.data$GT))
 
-  # Ensure genotype numeric
-  geno_long$GT <- as.numeric(geno_long$GT)
+  # N  checking R code for possible problems (7.1s)
+  #   genotype_boxplots: no visible binding for global variable ‘GT’
+  #   Undefined global functions or variables:
+  #     GT
 
   # -----------------------------
   # Merge with phenotype

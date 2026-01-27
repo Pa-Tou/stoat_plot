@@ -69,8 +69,8 @@ test_that("StoatPlot main functions run without errors", {
     genotype_boxplots(
       file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
       file.path(test_data_dir, "phenotype", "binary_phenotype_samples.tsv"),
-      "<4271",
-      ">4260",
+      "<4252",
+      ">4249",
       output = file.path(out_dir, "boxplots.png")
     ),
     NA
