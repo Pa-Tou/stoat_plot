@@ -46,12 +46,10 @@ manhattan_plot <- function(input,
   # Parse header
   header <- sub("^#", "", lines[header_idx])
   col_names <- strsplit(header, "\t")[[1]]
-  print(col_names)
 
   # Extract data lines
   data_lines <- lines[(header_idx + 1):length(lines)]
   data_lines <- data_lines[!grepl("^#", data_lines)]
-  print(strsplit(data_lines[[1]], "\t")[[1]])
 
   # Read data
   data <- read.delim(
@@ -188,7 +186,7 @@ manhattan_plot <- function(input,
       )
   }
 
-  ggsave(output, plot = p, width = 12, height = 4)
+  ggsave(output, plot = p, width = 20, height = 10)
 }
 
 # If this is called as a script, do this. I think this will prevent it from being called when just importing the file
