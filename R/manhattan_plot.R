@@ -15,8 +15,8 @@
 #' @param input Path to the input GWAS TSV file.
 #' @param p_column Column name to use for p-values (default: "P").
 #' @param chr Optional column name for chromosome (default: NULL, will try "CHR").
-#' @param start Optional column name for start positions (default: NULL, will try "START_OFFSET").
-#' @param end Optional column name for end positions (default: NULL, will try "END_OFFSET").
+#' @param start Optional column name for start positions (default: NULL, will try "START_POS").
+#' @param end Optional column name for end positions (default: NULL, will try "END_POS").
 #' @param p_threshold P-value threshold for the horizontal significance line (default: 1e-5).
 #' @param output Path to save the output plot image.
 #'
@@ -38,21 +38,23 @@ manhattan_plot <- function(input,
   lines <- readLines(input)
 
   # Detect header line
-  header_idx <- grep("^#START_NODE", lines)
+  header_idx <- grep("^#CHR", lines)
   if (length(header_idx) == 0) {
-    stop("Header line '#START_NODE' not found in the input file.")
+    stop("Header line '#CHR' not found in the input file.")
   }
 
   # Parse header
   header <- sub("^#", "", lines[header_idx])
   col_names <- strsplit(header, "\t")[[1]]
+  print(col_names)
 
   # Extract data lines
   data_lines <- lines[(header_idx + 1):length(lines)]
   data_lines <- data_lines[!grepl("^#", data_lines)]
+  print(strsplit(data_lines[[1]], "\t")[[1]])
 
   # Read data
-  data <- read.table(
+  data <- read.delim(
     text = data_lines,
     sep = "\t",
     header = FALSE,
@@ -67,36 +69,36 @@ manhattan_plot <- function(input,
     stop(paste("Column:", p_column, "not found in the input file."))
   }
 
-  if (!("START_OFFSET" %in% colnames(data))) {
-    stop("Input file must contain column: 'START_OFFSET'")
+  if (!("START_POS" %in% colnames(data))) {
+    stop("Input file must contain column: 'START_POS'")
   }
 
   # -----------------------------
   # Prepare data
   # -----------------------------
-  data$START_OFFSET <- as.integer(data$START_OFFSET)
+  data$START_POS <- as.integer(data$START_POS)
   data$P <- pmax(as.numeric(data[[p_column]]), 1e-300)
 
-  data <- data[!is.na(data$START_OFFSET) & !is.na(data$P), ]
+  data <- data[!is.na(data$START_POS) & !is.na(data$P), ]
 
   # Assign chromosome
-  if (!is.null(chr)) {
-    data$CHR <- chr
-  } else if ("REF_INDEX" %in% colnames(data)) {
-    data$CHR <- paste0("ref", data$REF_INDEX)
-  } else {
-    stop("Chromosome information missing: provide 'chr' or 'REF_INDEX' column.")
-  }
+  #if (!is.null(chr)) {
+  #  data$CHR <- chr
+  #} else if ("REF_INDEX" %in% colnames(data)) {
+  #  data$CHR <- paste0("ref", data$REF_INDEX)
+  #} else {
+  #  stop("Chromosome information missing: provide 'chr' or 'REF_INDEX' column.")
+  #}
 
   # -----------------------------
   # Genomic filters
   # -----------------------------
   if (!is.null(start)) {
-    data <- data[data$START_OFFSET >= start, ]
+    data <- data[data$START_POS >= start, ]
   }
 
   if (!is.null(end)) {
-    data <- data[data$START_OFFSET <= end, ]
+    data <- data[data$START_POS <= end, ]
   }
 
   if (!is.null(start) && !is.null(end) && start > end) {
@@ -108,7 +110,7 @@ manhattan_plot <- function(input,
   # -----------------------------
   data <- data.frame(
     CHR = data$CHR,
-    BP = data$START_OFFSET,
+    BP = data$START_POS,
     P = data$P,
     stringsAsFactors = FALSE
   )
@@ -191,5 +193,6 @@ manhattan_plot <- function(input,
 
 # If this is called as a script, do this. I think this will prevent it from being called when just importing the file
 if (sys.nframe() == 0){
+    library(tidyverse)
     manhattan_plot(commandArgs(TRUE)[1])
 }
