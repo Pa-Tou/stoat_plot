@@ -1,3 +1,10 @@
+#!/usr/bin/Rscript
+# Run as:
+# ./manhattan_plot.R [input file from stoat]  
+# Writes file manhattan_plot.png to current directory
+# TODO: Add other options as command line options
+
+
 #' Manhattan Plot for GWAS Results
 #' @description Generate Manhattan plots from STOAT GWAS results (keeps CHR names like 'chr1', 'chrX', etc.)
 #'
@@ -180,4 +187,9 @@ manhattan_plot <- function(input,
   }
 
   ggsave(output, plot = p, width = 12, height = 4)
+}
+
+# If this is called as a script, do this. I think this will prevent it from being called when just importing the file
+if (sys.nframe() == 0){
+    manhattan_plot(commandArgs(TRUE)[1])
 }
