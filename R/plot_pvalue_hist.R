@@ -4,8 +4,8 @@
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline aes_string geom_histogram
 #' @importFrom rlang .data
 #' @importFrom utils read.table
-#' 
-#' @param input Path to input TSV file.
+#'
+#' @param gwas_data Path to the output stoat GWAS TSV file.
 #' @param output Filename to save the output plot (default: "pvalue_distribution_plot.png").
 #' @param min Minimun P-value threshold to include in the plot (default: 0).
 #' @param max Maximum P-value threshold to include in the plot (default: 1.0).
@@ -16,7 +16,7 @@
 #' @name plot_pvalue_hist
 #' @export
 
-plot_pvalue_hist <- function(input,
+plot_pvalue_hist <- function(gwas_data,
                              column_names = "P",
                              min = 0,
                              max = 1.0,
@@ -26,12 +26,12 @@ plot_pvalue_hist <- function(input,
   ## -----------------------------
   ## Read file lines
   ## -----------------------------
-  lines <- readLines(input)
+  lines <- readLines(gwas_data)
 
   ## Detect header line
   header_idx <- grep("^#START_NODE", lines)
   if (length(header_idx) == 0) {
-    stop("Header line '#START_NODE' not found in the input file.")
+    stop("Header line '#START_NODE' not found in the gwas_data file.")
   }
 
   ## Parse header
@@ -55,7 +55,7 @@ plot_pvalue_hist <- function(input,
   ## Determine p-value column
   ## -----------------------------
   if (!(column_names %in% colnames(data))) {
-    stop(paste("Column", column_names, "not found in the input file."))
+    stop(paste("Column", column_names, "not found in the gwas_data file."))
   }
   p_col <- column_names
 

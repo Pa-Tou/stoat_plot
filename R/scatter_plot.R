@@ -7,7 +7,7 @@
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline theme_minimal scale_y_log10
 #' @importFrom utils read.table
 #' 
-#' @param input        Path to input file (.txt or .gz), tab-separated. Header is expected.
+#' @param input        Path to the output stoat GWAS TSV file.
 #' @param output       Path to save the output image (e.g., "scatter_plot.png").
 #' @param title        Plot title (default: "Scatter plot").
 #' @param x_label      Label for the x-axis (default: column name from file).

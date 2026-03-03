@@ -4,7 +4,7 @@
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
 #' @importFrom utils read.table
 #'
-#' @param input Path to the input TSV file (must contain a column named 'P').
+#' @param gwas_data Path to the output stoat GWAS TSV file.
 #' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
 #' @param output Filename for the output PNG plot (default: "qq_plot.png").
 #'
@@ -12,10 +12,10 @@
 #' @name qq_plot
 #' @export
 
-qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
+qq_plot <- function(gwas_data, column_names = "P", output = "qq_plot.png") {
 
   # Read all lines
-  lines <- readLines(input)
+  lines <- readLines(gwas_data)
 
   # Identify the header line (starts with #START_NODE)
   header_idx <- grep("^#START_NODE", lines)
@@ -42,7 +42,7 @@ qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
 
   # Check p-value column
   if (!(column_names %in% colnames(data))) {
-    stop(paste("Column", column_names, "not found in the input file."))
+    stop(paste("Column", column_names, "not found in the gwas_data file."))
   }
 
   # Convert p-values

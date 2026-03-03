@@ -4,7 +4,7 @@
 #' @importFrom utils read.table head write.table
 #' @importFrom stats p.adjust median qchisq setNames
 #'
-#' @param input Stoat snarl analysis file path (snarl gwas analyse) [string].
+#' @param input Path to the output stoat GWAS TSV file..
 #' @param number_top_var Number of top variant print in the output top variant file [string] (default : 100).
 #' @param p_sig P-value threshold [numeric] (default : 1e-5).
 #' @param output Path/Name of the top variant output file [string] (default : "top_variant.tsv").
@@ -56,6 +56,7 @@ summary_stoat <- function(input, number_top_var=100, p_sig=1e-5, output="top_var
     data_lines <- data_lines[!grepl("^#", data_lines)]
     col_names <- c("START_NODE","END_NODE","REF_INDEX","START_OFFSET","END_OFFSET",
                     "DEPTH","ALLELE_LENGTHS","WALKS","SEQUENCES","P")
+
     df <- read.table(
         text = data_lines,
         sep = "\t",
@@ -131,11 +132,11 @@ summary_stoat <- function(input, number_top_var=100, p_sig=1e-5, output="top_var
         
         # Priority order: SV > MNP > SNP
         if ("SV" %in% variant_types) {
-        return("SV")
+            return("SV")
         } else if ("MNP" %in% variant_types) {
-        return("MNP")
+            return("MNP")
         } else {
-        return("SNP")
+            return("SNP")
         }
     }
 
@@ -300,7 +301,7 @@ summary_stoat <- function(input, number_top_var=100, p_sig=1e-5, output="top_var
 
     # Columns to save
     cols_to_save <- c("START_NODE", "END_NODE",
-                    "REF_INDEX", "START_OFFSET", "END_OFFSET", 
+                    "REF_INDEX", "START_OFFSET", "END_OFFSET",
                     "DEPTH", "ALLELE_LENGTHS", "SEQUENCES", "P")
 
     # Keep only columns that exist in df_top

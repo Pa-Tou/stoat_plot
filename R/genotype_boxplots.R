@@ -8,11 +8,11 @@
 #' @importFrom magrittr %>%
 #' @importFrom utils read.table
 #' @importFrom rlang .data
-#' 
-#' @param genotype_file Genotype file output of stoat vcf/graph
-#' @param phenotype_file Path to the phenotype file use for the GWAS analysis.
-#' @param node_start Node start boundary of the snarl [string]
-#' @param node_end Snarl end boundary of the snarl [string]
+#'
+#' @param genotype_file Genotype path file output of stoat.
+#' @param phenotype_file Phenotype path file use for the GWAS analysis.
+#' @param node_start Start node boundary of the snarl.
+#' @param node_end End node boundary of the snarl.
 #' @param output Path/Name to save the output plot image.
 #'
 #' @return Saves a genotype boxplots to the specified file.
@@ -23,10 +23,22 @@ genotype_boxplots <- function(genotype_file,
                               phenotype_file,
                               node_start,
                               node_end,
-                              output = "boxplots.jpeg") {
+                              output = "boxplots.png") {
+
+  ## ---------------------------
+  ## Input sanity checks
+  ## ---------------------------
+  if (!file.exists(genotype_file)) {
+    stop("genotype_file does not exist: ", genotype_file)
+  }
+
+  if (!file.exists(phenotype_file)) {
+    stop("phenotype_file does not exist: ", phenotype_file)
+  }
 
   # -----------------------------
   # Read phenotype file
+  # and validate format
   # -----------------------------
   pheno_data <- read.table(
     phenotype_file,
@@ -39,65 +51,115 @@ genotype_boxplots <- function(genotype_file,
 
   stopifnot(all(c("IID", "PHENO") %in% colnames(pheno_data)))
 
-  # -----------------------------
-  # Read STOAT genotype file (FORMAT-AWARE)
-  # -----------------------------
-  lines <- readLines(genotype_file)
-
-  header_idx <- grep("^#START_NODE", lines)
-  if (length(header_idx) == 0) {
-    stop("START_NODE header not found in genotype file")
+  # stop is file is empty or only has header
+  if (nrow(pheno_data) == 0) {
+    stop("Phenotype file is empty or only has header.")
   }
 
-  header <- sub("^#", "", lines[header_idx])
-  col_names <- strsplit(header, "\t")[[1]]
+  # -----------------------------
+  # Read header Genotype file
+  # and validate format
+  # -----------------------------
+  con <- file(genotype_file, open = "r")
 
-  data_lines <- lines[(header_idx + 1):length(lines)]
-  data_lines <- data_lines[!grepl("^#", data_lines)]
+  header_line <- NULL
+  line_count <- 0
+
+  repeat {
+    line <- readLines(con, n = 1)
+    if (length(line) == 0) break  # end of file
+    line_count <- line_count + 1
+
+    if (grepl("^#START_NODE\\b", line)) {
+      header_line <- line
+      break
+    }
+  }
+
+  close(con)
+
+  if (is.null(header_line)) {
+    stop("header not found in genotype file.")
+  }
+
+  # Remove leading '#'
+  header_line <- sub("^#", "", header_line)
+
+  # Split columns
+  col_names <- strsplit(header_line, "\t", fixed = TRUE)[[1]]
+
+  # Expected fixed header
+  expected_cols <- c(
+    "START_NODE",
+    "END_NODE",
+    "REF_INDEX",
+    "START_OFFSET",
+    "END_OFFSET",
+    "DEPTH",
+    "ALLELE_LENGTHS",
+    "WALKS",
+    "SEQUENCES"
+  )
+
+  # Check exact match
+  if (!identical(col_names[1:9], expected_cols)) {
+    stop(
+      paste0(
+        "Invalid genotype file format.\n",
+        "Expected first 9 columns:\n",
+        paste(expected_cols, collapse = "\t")
+      )
+    )
+  }
 
   geno_data <- read.table(
-    text = data_lines,
+    genotype_file,
     sep = "\t",
     header = FALSE,
     stringsAsFactors = FALSE,
     col.names = col_names,
+    skip = line_count,
+    comment.char = "",
+    quote = "",
+    fill = FALSE,
     check.names = FALSE
   )
 
   # -----------------------------
   # Create snarl ID
   # -----------------------------
-  geno_data <- geno_data %>%
-    mutate(SNARL_ID = paste0(.data$START_NODE, .data$END_NODE))
+  target_start <- node_start
+  target_end   <- node_end
 
-  target_snarl <- paste0(node_start, node_end)
-
-  geno_data <- geno_data %>%
-    filter(.data$SNARL_ID == target_snarl)
+  # Filter directly (no SNARL_ID column needed)
+  geno_data <- geno_data[
+    geno_data$START_NODE == target_start &
+    geno_data$END_NODE   == target_end,
+    ,drop = FALSE
+  ]
 
   if (nrow(geno_data) == 0) {
-    stop(sprintf("snarl_id %s not found in genotype file", target_snarl))
+    stop(sprintf(
+      "Snarl not found: %s -> %s. Try to swap start and end nodes.",
+      target_start, target_end
+    ))
+  }
+
+  if (nrow(geno_data) > 1) {
+    stop(sprintf(
+      "Duplicated Snarl found: %s -> %s. Please check the genotype file.",
+      target_start, target_end
+    ))
   }
 
   # -----------------------------
   # Identify genotype/sample columns
   # (all columns after SEQUENCES)
   # -----------------------------
-  seq_idx <- which(colnames(geno_data) == "SEQUENCES")
-
-  if (length(seq_idx) != 1) {
-    stop("Column 'SEQUENCES' not found or not unique in genotype file.")
-  }
+  seq_idx <- match("SEQUENCES", names(geno_data))
 
   # all columns after SEQUENCES
   genotype_columns <- colnames(geno_data)[(seq_idx + 1):ncol(geno_data)]
-
-  # Remove any derived columns that are not samples (e.g., SNARL_ID if exists)
-  genotype_columns <- setdiff(genotype_columns, c("SNARL_ID"))
-
-  if (length(genotype_columns) == 0) {
-    stop("No genotype/sample columns detected after 'SEQUENCES'.")
-  }
 
   # -----------------------------
   # Convert to long format
@@ -114,11 +176,6 @@ genotype_boxplots <- function(genotype_file,
       GT = as.numeric(.data$GT)
     ) %>%
     filter(!is.na(.data$GT))
-
-  # N  checking R code for possible problems (7.1s)
-  #   genotype_boxplots: no visible binding for global variable ‘GT’
-  #   Undefined global functions or variables:
-  #     GT
 
   # -----------------------------
   # Merge with phenotype
@@ -171,7 +228,7 @@ genotype_boxplots <- function(genotype_file,
       fill = "darkcyan"
     ) +
     labs(
-      title = paste("Snarl:", target_snarl),
+      title = paste("Snarl:", target_start, target_end),
       x = "Genotype",
       y = "Phenotype"
     ) +
@@ -183,7 +240,6 @@ genotype_boxplots <- function(genotype_file,
   ggsave(
     filename = output,
     plot = p,
-    device = "jpeg",
     width = 8,
     height = 6,
     dpi = 300
