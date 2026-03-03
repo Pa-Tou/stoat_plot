@@ -17,7 +17,7 @@ scatter_plot(
 )
 }
 \arguments{
-\item{input}{Path to input file (.txt or .gz), tab-separated. Header is expected.}
+\item{input}{Path to the output stoat GWAS TSV file.}
 
 \item{output}{Path to save the output image (e.g., "scatter_plot.png").}
 

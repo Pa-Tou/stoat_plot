@@ -5,7 +5,7 @@
 \title{P-value Histogram for STOAT GWAS Results}
 \usage{
 plot_pvalue_hist(
-  input,
+  gwas_data,
   column_names = "P",
   min = 0,
   max = 1,
@@ -14,7 +14,7 @@ plot_pvalue_hist(
 )
 }
 \arguments{
-\item{input}{Path to input TSV file.}
+\item{gwas_data}{Path to the output stoat GWAS TSV file.}
 
 \item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 

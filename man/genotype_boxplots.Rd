@@ -9,17 +9,17 @@ genotype_boxplots(
   phenotype_file,
   node_start,
   node_end,
-  output = "boxplots.jpeg"
+  output = "boxplots.png"
 )
 }
 \arguments{
-\item{genotype_file}{Genotype file output of stoat vcf/graph}
+\item{genotype_file}{Genotype path file output of stoat.}
 
-\item{phenotype_file}{Path to the phenotype file use for the GWAS analysis.}
+\item{phenotype_file}{Phenotype path file use for the GWAS analysis.}
 
-\item{node_start}{Node start boundary of the snarl [string]}
+\item{node_start}{Start node boundary of the snarl.}
 
-\item{node_end}{Snarl end boundary of the snarl [string]}
+\item{node_end}{End node boundary of the snarl.}
 
 \item{output}{Path/Name to save the output plot image.}
 }

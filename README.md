@@ -83,7 +83,7 @@ genotype_boxplots(
   file.path(test_data_dir, "phenotype", "quantitative_phenotype_samples.tsv"),
   "<4252",
   ">4249",
-  output = "boxplots.jpeg"
+  output = "boxplots.png"
 )
 
 # Print summary

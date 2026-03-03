@@ -5,7 +5,7 @@
 \title{Manhattan Plot for GWAS Results}
 \usage{
 manhattan_plot(
-  input,
+  gwas_file,
   p_column = "P",
   chr = NULL,
   start = NULL,
@@ -15,7 +15,7 @@ manhattan_plot(
 )
 }
 \arguments{
-\item{input}{Path to the input GWAS TSV file.}
+\item{gwas_file}{Path to the output stoat GWAS TSV file.}
 
 \item{p_column}{Column name to use for p-values (default: "P").}
 

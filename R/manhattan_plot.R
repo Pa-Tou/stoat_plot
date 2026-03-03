@@ -117,7 +117,7 @@ manhattan_plot <- function(gwas_file,
   )
 
   # Check exact match
-  if (!identical(col_names[1:9], expected_cols)) {
+  if (!identical(col_names[1:10], expected_cols)) {
     stop(
       paste0(
         "Invalid gwas file format.\n",
@@ -254,7 +254,7 @@ manhattan_plot <- function(gwas_file,
       axis.text = element_text(color = "black"),
       panel.grid.minor = element_blank(),
       legend.position = "none",
-      axis.text.x = element_text(angle = 90, vjust = 0.5, size = 10)
+      axis.text.x = element_text()
     )
 
   if (is.null(chr)) {

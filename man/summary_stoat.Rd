@@ -12,7 +12,7 @@ summary_stoat(
 )
 }
 \arguments{
-\item{input}{Stoat snarl analysis file path (snarl gwas analyse) [string].}
+\item{input}{Path to the output stoat GWAS TSV file..}
 
 \item{number_top_var}{Number of top variant print in the output top variant file [string] (default : 100).}
 
