@@ -103,13 +103,10 @@ plot_pvalue_hist(
 )
 
 # Dot plot of Path Length Frequencies
-path_length_distribution(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
+path_length_distribution(file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"))
 
 # Snarl type histogram
-snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
-
-# Scatter plot
-scatter_plot(file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"))
+snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"))
 ```
 
 ---

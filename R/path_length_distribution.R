@@ -14,14 +14,54 @@
 #' @name path_length_distribution_all
 #' @export
 
-path_length_distribution <- function(input, min = 0, max = Inf, output = "path_length_dot_ecdf.png") {
+path_length_distribution <- function(input, min = 0, max = Inf,
+                                      output = "path_length_dot_ecdf.png") {
 
-  # Read input
-  df <- read.table(input, header = TRUE)
-  if (!"TYPE" %in% colnames(df)) stop("Column 'TYPE' not found in data.")
+  con <- file(input, "r")
+  on.exit(close(con))
+
+  line_count <- 0
+
+  # --- Find header line ---
+  repeat {
+    line <- readLines(con, n = 1)
+    if (length(line) == 0) {
+      stop("Unexpected end of file before finding '#START_NODE'.")
+    }
+
+    line_count <- line_count + 1
+
+    if (grepl("^#START_NODE\\b", line)) {
+      header_line <- sub("^#", "", line)
+      break
+    }
+  }
+
+  # Split column names
+  col_names <- strsplit(header_line, "\t", fixed = TRUE)[[1]]
+
+  # Read table from current position
+  df <- read.table(
+    con,
+    sep = "\t",
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = col_names,
+    comment.char = "",
+    quote = "",
+    fill = FALSE,
+    check.names = FALSE
+  )
+
+  if (!"ALLELE_LENGTHS" %in% colnames(df)) {
+    stop("Column 'ALLELE_LENGTHS' not found in data.")
+  }
+
+  # Remove '.' entries
+  df <- df[!is.na(df$ALLELE_LENGTHS) & df$ALLELE_LENGTHS != ".", ]
 
   # Flatten path lengths
-  all_values <- unlist(sapply(as.character(df$TYPE), function(x) {
+  all_values <- unlist(lapply(df$ALLELE_LENGTHS, function(x) {
     vals <- unlist(strsplit(x, "[,/]+"))
     as.numeric(vals)
   }))

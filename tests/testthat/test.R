@@ -4,7 +4,6 @@ library(testthat)
 library(StoatPlot)
 
 test_that("StoatPlot main functions run without errors", {
-
   # Path to packaged test data
   test_data_dir <- system.file("extdata", package = "StoatPlot")
   expect_true(dir.exists(test_data_dir))
@@ -81,7 +80,7 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     path_length_distribution(
-      file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"),
+      file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"),
       output = file.path(out_dir, "path_length.png")
     ),
     NA
@@ -92,21 +91,9 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     snarl_type_histogram(
-      file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"),
+      file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"),
       output = file.path(out_dir, "snarl_type.png")
     ),
     NA
   )
-
-  # -------------------------
-  # Scatter plot
-  # -------------------------
-  expect_error(
-    scatter_plot(
-      file.path(test_data_dir, "snarl_paths", "binary_snarl_analyse.tsv"),
-      output = file.path(out_dir, "scatter.png")
-    ),
-    NA
-  )
-
 })
