@@ -6,14 +6,14 @@
 \title{Path Length Distribution Plots for STOAT}
 \usage{
 path_length_distribution(
-  input,
+  snarl_file,
   min = 0,
   max = Inf,
   output = "path_length_dot_ecdf.png"
 )
 }
 \arguments{
-\item{input}{Path to the input TSV file.}
+\item{snarl_file}{Path to the snarl_file TSV file.}
 
 \item{min}{Minimum path length to include (default: 0).}
 

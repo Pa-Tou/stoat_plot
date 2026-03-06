@@ -5,26 +5,26 @@
 \title{P-value Histogram for STOAT GWAS Results}
 \usage{
 plot_pvalue_hist(
-  gwas_data,
-  column_names = "P",
+  gwas_file,
+  p_column = "P",
   min = 0,
   max = 1,
-  bin = 100,
+  bins = 100,
   output = "pvalue_distribution_plot.png"
 )
 }
 \arguments{
-\item{gwas_data}{Path to the output stoat GWAS TSV file.}
+\item{gwas_file}{Path to the output stoat GWAS TSV file.}
 
-\item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
+\item{p_column}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 
 \item{min}{Minimun P-value threshold to include in the plot (default: 0).}
 
 \item{max}{Maximum P-value threshold to include in the plot (default: 1.0).}
 
-\item{bin}{Number of bins in the histogram (default: 200).}
-
 \item{output}{Filename to save the output plot (default: "pvalue_distribution_plot.png").}
+
+\item{bin}{Number of bins in the histogram (default: 200).}
 }
 \value{
 Saves a histogram plot as an image file.

@@ -5,7 +5,7 @@
 #' @importFrom utils read.table
 #' @importFrom stats ecdf
 #'
-#' @param input Path to the input TSV file.
+#' @param snarl_file Path to the snarl_file TSV file.
 #' @param min Minimum path length to include (default: 0).
 #' @param max Maximum path length to include (default: Inf).
 #' @param output Path to the output plot (default: "path_length_dot_ecdf.png").
@@ -14,10 +14,10 @@
 #' @name path_length_distribution_all
 #' @export
 
-path_length_distribution <- function(input, min = 0, max = Inf,
+path_length_distribution <- function(snarl_file, min = 0, max = Inf,
                                       output = "path_length_dot_ecdf.png") {
 
-  con <- file(input, "r")
+  con <- file(snarl_file, "r")
   on.exit(close(con))
 
   line_count <- 0
@@ -65,7 +65,7 @@ path_length_distribution <- function(input, min = 0, max = Inf,
     vals <- unlist(strsplit(x, "[,/]+"))
     as.numeric(vals)
   }))
-  
+
   # Filter by min/max
   all_values <- all_values[!is.na(all_values) & all_values >= min & all_values <= max]
   if (length(all_values) == 0) stop("No path lengths within the specified range.")

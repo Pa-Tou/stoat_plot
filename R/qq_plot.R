@@ -4,49 +4,46 @@
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
 #' @importFrom utils read.table
 #'
-#' @param gwas_data Path to the output stoat GWAS TSV file.
-#' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
+#' @param gwas_file Path to the output stoat GWAS TSV file.
+#' @param p_column Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
 #' @param output Filename for the output PNG plot (default: "qq_plot.png").
 #'
 #' @return Saves a Q-Q plot image.
 #' @name qq_plot
 #' @export
 
-qq_plot <- function(gwas_data, column_names = "P", output = "qq_plot.png") {
+qq_plot <- function(gwas_file, 
+              p_column = "P", 
+              output = "qq_plot.png") {
 
-  # Read all lines
-  lines <- readLines(gwas_data)
-
-  # Identify the header line (starts with #START_NODE)
-  header_idx <- grep("^#START_NODE", lines)
-  if (length(header_idx) == 0) {
-    stop("Header line '#START_NODE' not found in the file.")
+  ## ---------------------------
+  ## Input checks
+  ## ---------------------------
+  if (!file.exists(gwas_file)) {
+    stop("gwas_file does not exist: ", gwas_file)
   }
 
-  # Extract header and clean '#'
-  header <- sub("^#", "", lines[header_idx])
-  col_names <- strsplit(header, "\t")[[1]]
-
-  # Extract data lines (after header, not starting with #)
-  data_lines <- lines[(header_idx + 1):length(lines)]
-  data_lines <- data_lines[!grepl("^#", data_lines)]
-
-  # Read data into data.frame
-  data <- read.table(
-    text = data_lines,
+  ## ---------------------------
+  ## Read GWAS file
+  ## ---------------------------
+  gwas_data <- read.table(
+    gwas_file,
     sep = "\t",
-    header = FALSE,
+    header = TRUE,
     stringsAsFactors = FALSE,
-    col.names = col_names
+    check.names = FALSE,
+    comment.char = ""
   )
 
+  colnames(gwas_data) <- sub("^#", "", colnames(gwas_data))
+
   # Check p-value column
-  if (!(column_names %in% colnames(data))) {
-    stop(paste("Column", column_names, "not found in the gwas_data file."))
+  if (!(p_column %in% colnames(gwas_data))) {
+    stop(paste("Column", p_column, "not found in the gwas_data file."))
   }
 
   # Convert p-values
-  pvals <- suppressWarnings(as.numeric(data[[column_names]]))
+  pvals <- suppressWarnings(as.numeric(gwas_data[[p_column]]))
 
   # Filter valid p-values
   valid <- !is.na(pvals) & pvals > 0 & pvals <= 1
@@ -64,7 +61,7 @@ qq_plot <- function(gwas_data, column_names = "P", output = "qq_plot.png") {
   plot_df <- data.frame(Expected = expected, Observed = observed)
 
   # Genomic inflation factor
-  chisq <- qchisq(1 - pvals, df = 1)
+  chisq <- qchisq(1 - pvals, df = 1, lower.tail = FALSE)
   lambda <- median(chisq, na.rm = TRUE) / qchisq(0.5, df = 1)
 
   # Plot

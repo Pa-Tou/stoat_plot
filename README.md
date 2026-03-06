@@ -79,34 +79,47 @@ test_data_dir <- system.file("extdata", package = "StoatPlot")
 
 # Boxplot of phenotype/genotype for all regression tables
 genotype_boxplots(
-  file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
-  file.path(test_data_dir, "phenotype", "quantitative_phenotype_samples.tsv"),
+  file.path(test_data_dir, "genotype", "binary.genotype.tsv"),
+  file.path(test_data_dir, "phenotype", "binary.phenotype.tsv"),
   "<4252",
   ">4249",
   output = "boxplots.png"
 )
 
 # Print summary
-summary_stoat(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
+summary_stoat(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  number_top_var=20, p_column="P_CHI2", p_threshold=0.001, 
+  output = "top_variant.chi2.filtered.png")
+
+# Print summary
+summary_stoat(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2", output ="top_variant.chi2.png")
+
+manhattan_plot(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2", chr="ref", start=43046, end=129765, p_threshold=1e-3, 
+  output ="manhattan_plot.chi2.filtered.png")
 
 # Manhattan plot
-manhattan_plot(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
+manhattan_plot(file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2")
 
 # Q-Q plot
-qq_plot(file.path(test_data_dir, "gwas", "pg.gwas.tsv"))
+qq_plot(file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2")
 
 # Histogram of p-values
 plot_pvalue_hist(
-  file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
+  file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2",
   min = 0.00001,
   max = 0.5
 )
 
 # Dot plot of Path Length Frequencies
-path_length_distribution(file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"))
+path_length_distribution(file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"))
 
 # Snarl type histogram
-snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"))
+snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"))
 ```
 
 ---

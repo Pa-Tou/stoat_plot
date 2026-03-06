@@ -4,12 +4,12 @@
 \alias{qq_plot}
 \title{Q-Q Plot for GWAS Results}
 \usage{
-qq_plot(gwas_data, column_names = "P", output = "qq_plot.png")
+qq_plot(gwas_file, p_column = "P", output = "qq_plot.png")
 }
 \arguments{
-\item{gwas_data}{Path to the output stoat GWAS TSV file.}
+\item{gwas_file}{Path to the output stoat GWAS TSV file.}
 
-\item{column_names}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
+\item{p_column}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
 
 \item{output}{Filename for the output PNG plot (default: "qq_plot.png").}
 }

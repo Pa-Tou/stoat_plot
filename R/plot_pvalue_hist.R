@@ -5,102 +5,100 @@
 #' @importFrom rlang .data
 #' @importFrom utils read.table
 #'
-#' @param gwas_data Path to the output stoat GWAS TSV file.
+#' @param gwas_file Path to the output stoat GWAS TSV file.
 #' @param output Filename to save the output plot (default: "pvalue_distribution_plot.png").
 #' @param min Minimun P-value threshold to include in the plot (default: 0).
 #' @param max Maximum P-value threshold to include in the plot (default: 1.0).
 #' @param bin Number of bins in the histogram (default: 200).
-#' @param column_names Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
+#' @param p_column Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
 #'
 #' @return Saves a histogram plot as an image file.
 #' @name plot_pvalue_hist
 #' @export
 
-plot_pvalue_hist <- function(gwas_data,
-                             column_names = "P",
+plot_pvalue_hist <- function(gwas_file,
+                             p_column = "P",
                              min = 0,
                              max = 1.0,
-                             bin = 100,
+                             bins = 100,
                              output = "pvalue_distribution_plot.png") {
 
-  ## -----------------------------
-  ## Read file lines
-  ## -----------------------------
-  lines <- readLines(gwas_data)
-
-  ## Detect header line
-  header_idx <- grep("^#START_NODE", lines)
-  if (length(header_idx) == 0) {
-    stop("Header line '#START_NODE' not found in the gwas_data file.")
+  ## ---------------------------
+  ## Input checks
+  ## ---------------------------
+  if (!file.exists(gwas_file)) {
+    stop("gwas_file does not exist: ", gwas_file)
   }
 
-  ## Parse header
-  header <- sub("^#", "", lines[header_idx])
-  col_names <- strsplit(header, "\t")[[1]]
+  if (!is.numeric(min) || !is.numeric(max) || min < 0 || max > 1 || min >= max) {
+    stop("Invalid p-value range. Must satisfy: 0 <= min < max <= 1.")
+  }
 
-  ## Extract data lines
-  data_lines <- lines[(header_idx + 1):length(lines)]
-  data_lines <- data_lines[!grepl("^#", data_lines)]
-
-  ## Read data table
-  data <- read.table(
-    text = data_lines,
+  ## ---------------------------
+  ## Read file
+  ## ---------------------------
+  gwas_data <- read.table(
+    gwas_file,
     sep = "\t",
-    header = FALSE,
+    header = TRUE,
     stringsAsFactors = FALSE,
-    col.names = col_names
+    check.names = FALSE,
+    comment.char = ""
   )
 
-  ## -----------------------------
-  ## Determine p-value column
-  ## -----------------------------
-  if (!(column_names %in% colnames(data))) {
-    stop(paste("Column", column_names, "not found in the gwas_data file."))
-  }
-  p_col <- column_names
+  colnames(gwas_data) <- sub("^#", "", colnames(gwas_data))
 
-  ## Convert to numeric
-  data[[p_col]] <- suppressWarnings(as.numeric(data[[p_col]]))
-
-  if (any(is.na(data[[p_col]]))) {
-    warning("NA or non-numeric values detected in the p-value column. They were excluded.")
+  if (!(p_column %in% colnames(gwas_data))) {
+    stop("Column not found: ", p_column)
   }
 
-  ## -----------------------------
+  ## ---------------------------
+  ## Convert p-values
+  ## ---------------------------
+  gwas_data[[p_column]] <- suppressWarnings(
+    as.numeric(gwas_data[[p_column]])
+  )
+
+  if (any(is.na(gwas_data[[p_column]]))) {
+    warning("NA or non-numeric values detected and removed.")
+  }
+
+  ## ---------------------------
   ## Filter valid p-values
-  ## -----------------------------
-  data_filtered <- data[
-    !is.na(data[[p_col]]) &
-      data[[p_col]] >= min &
-      data[[p_col]] <= max,
+  ## ---------------------------
+  data_filtered <- gwas_data[
+    !is.na(gwas_data[[p_column]]) &
+      gwas_data[[p_column]] >= min &
+      gwas_data[[p_column]] <= max,
   ]
 
   if (nrow(data_filtered) == 0) {
     stop("No valid P-values found within the specified range.")
   }
 
-  ## -----------------------------
+  ## ---------------------------
   ## Plot
-  ## -----------------------------
-  p <- ggplot(data_filtered, aes(x = .data[[p_col]])) +
-    geom_histogram(
-      bins = bin,
+  ## ---------------------------
+  p <- ggplot2::ggplot(data_filtered,
+                       ggplot2::aes(x = .data[[p_column]])) +
+    ggplot2::geom_histogram(
+      bins = bins,
       fill = "cadetblue3",
       color = "darkcyan",
       alpha = 0.7
     ) +
-    theme_minimal(base_size = 14) +
-    theme(
-      plot.title = element_text(face = "bold", hjust = 0.5),
-      axis.title = element_text(face = "bold"),
-      axis.text = element_text(color = "black", size = 12),
-      panel.grid.minor = element_blank()
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+      axis.title = ggplot2::element_text(face = "bold"),
+      axis.text = ggplot2::element_text(color = "black", size = 12),
+      panel.grid.minor = ggplot2::element_blank()
     ) +
-    labs(
+    ggplot2::labs(
       title = paste0("Distribution of P-values (", min, " - ", max, ")"),
       x = "P-value",
       y = "Frequency"
     )
 
-  ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
+  ggplot2::ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
 }

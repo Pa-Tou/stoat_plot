@@ -26,193 +26,91 @@ manhattan_plot <- function(gwas_file,
                            output = "manhattan_plot.png") {
 
   ## ---------------------------
-  ## Input sanity checks
+  ## Input checks
   ## ---------------------------
-  if (!is.null(start) && !is.null(end) && start > end) {
-    stop("start must be <= end")
-  }
-
-  # return error if gwas_file does not exist
   if (!file.exists(gwas_file)) {
     stop("gwas_file does not exist: ", gwas_file)
   }
 
-  # return an error if p_threshold is not a positive number
   if (!is.numeric(p_threshold) || p_threshold <= 0) {
     stop("p_threshold must be a positive number")
   }
 
-  # -----------------------------
-  # Read header of GWAS file
-  # and validate format
-  # -----------------------------
-  con <- file(gwas_file, open = "r")
-  on.exit(close(con))
-
-  header_line <- NULL
-  chr_list <- character(0)
-  line_count <- 0
-
-  repeat {
-    line <- readLines(con, n = 1)
-
-    if (length(line) == 0) {
-      stop("Unexpected end of file before finding '#START_NODE'.")
-    }
-
-    line_count <- line_count + 1
-
-    # Capture column header
-    if (grepl("^#START_NODE\\b", line)) {
-      header_line <- line
-      break
-    }
-
-    # Capture chromosome section
-    if (grepl("^#REFS\\b", line)) {
-
-      repeat {
-        line <- readLines(con, n = 1)
-
-        if (length(line) == 0) {
-          stop("Unexpected end of file inside '#REFS' section.")
-        }
-
-        line_count <- line_count + 1
-
-        # End of chromosome section
-        if (grepl("^#SNARLS\\b", line)) {
-          break
-        }
-
-        # Remove leading '#' and store chromosome name
-        chr_name <- sub("^#", "", line)
-        chr_list[length(chr_list) + 1] <- chr_name
-      }
-    }
+  if (!is.null(start) && !is.null(end) && start > end) {
+    stop("start must be <= end")
   }
 
-  if (is.null(header_line)) {
-    stop("Column header '#START_NODE' not found in GWAS file.")
-  }
-
-  # Remove leading '#'
-  header_line <- sub("^#", "", header_line)
-
-  # Split columns
-  col_names <- strsplit(header_line, "\t", fixed = TRUE)[[1]]
-
-  # Expected fixed header
-  expected_cols <- c(
-    "START_NODE",
-    "END_NODE",
-    "REF_INDEX",
-    "START_OFFSET",
-    "END_OFFSET",
-    "DEPTH",
-    "ALLELE_LENGTHS",
-    "WALKS",
-    "SEQUENCES",
-    "P"
-  )
-
-  # Check exact match
-  if (!identical(col_names[1:10], expected_cols)) {
-    stop(
-      paste0(
-        "Invalid gwas file format.\n",
-        "Expected first 10 columns:\n",
-        paste(expected_cols, collapse = "\t")
-      )
-    )
-  }
-
+  ## ---------------------------
+  ## Read GWAS file
+  ## ---------------------------
   gwas_data <- read.table(
     gwas_file,
     sep = "\t",
-    header = FALSE,
+    header = TRUE,
     stringsAsFactors = FALSE,
-    col.names = col_names,
-    skip = line_count,
-    comment.char = "",
-    quote = "",
-    fill = FALSE,
-    check.names = FALSE
+    check.names = FALSE,
+    comment.char = ""
   )
 
-  # -----------------------------
-  # Filter by chromosome if provided
-  # -----------------------------
+  colnames(gwas_data) <- sub("^#", "", colnames(gwas_data))
+
+  ## ---------------------------
+  ## Validate required columns
+  ## ---------------------------
+  required_cols <- c("CHR", "START_OFFSET", p_column)
+
+  missing_cols <- setdiff(required_cols, colnames(gwas_data))
+  if (length(missing_cols) > 0) {
+    stop("Missing required column(s): ", paste(missing_cols, collapse = ", "))
+  }
+
+  ## ---------------------------
+  ## Prepare columns
+  ## ---------------------------
+  gwas_data$BP <- as.integer(gwas_data$START_OFFSET)
+  gwas_data$P  <- pmax(as.numeric(gwas_data[[p_column]]), 1e-300)
+  gwas_data <- gwas_data[!is.na(gwas_data$BP) & !is.na(gwas_data$P), ]
+
+  ## ---------------------------
+  ## Filters
+  ## ---------------------------
   if (!is.null(chr)) {
-
-    # Find index(es) of requested chromosome(s)
-    chr_idx <- match(chr, chr_list)
-
-    if (any(is.na(chr_idx))) {
-      stop(sprintf(
-        "Chromosome(s) not found in header: %s",
-        paste(chr[is.na(chr_idx)], collapse = ", ")
-      ))
-    }
-
-    # Convert to 0-based index (since REF_INDEX is 0-based)
-    chr_idx <- chr_idx - 1
-
-    # Filter data
-    gwas_data <- gwas_data[gwas_data$REF_INDEX %in% chr_idx, , drop = FALSE]
+    gwas_data <- gwas_data[gwas_data$CHR %in% chr, ]
 
     if (nrow(gwas_data) == 0) {
       stop("No variants found for the specified chromosome(s).")
     }
-  } else {
-    # If no chromosome specified, add CHR column based on REF_INDEX
-    gwas_data$CHR <- factor(
-      chr_list[gwas_data$REF_INDEX + 1],
-      levels = chr_list
-    )
   }
 
-  # -----------------------------
-  # Prepare gwas_data
-  # -----------------------------
-  gwas_data$START_OFFSET <- as.integer(gwas_data$START_OFFSET)
-  gwas_data$P <- pmax(as.numeric(gwas_data[[p_column]]), 1e-300)
-
-  gwas_data <- gwas_data[!is.na(gwas_data$START_OFFSET) & !is.na(gwas_data$P), ]
-
   if (!is.null(start)) {
-    gwas_data <- gwas_data[gwas_data$START_OFFSET >= start, ]
+    gwas_data <- gwas_data[gwas_data$BP >= start, ]
   }
 
   if (!is.null(end)) {
-    gwas_data <- gwas_data[gwas_data$START_OFFSET <= end, ]
+    gwas_data <- gwas_data[gwas_data$BP <= end, ]
   }
 
-  # -----------------------------
-  # Prepare plotting gwas_data
-  # -----------------------------
-  gwas_data <- data.frame(
-    CHR = gwas_data$CHR,
-    BP = gwas_data$START_OFFSET,
-    P = gwas_data$P,
-    stringsAsFactors = FALSE
-  )
-
+  ## ---------------------------
+  ## Prepare plotting data
+  ## ---------------------------
   gwas_data$logp <- -log10(gwas_data$P)
 
-  # -----------------------------
-  # X-axis handling
-  # -----------------------------
+  ## ---------------------------
+  ## X-axis handling
+  ## ---------------------------
   if (!is.null(chr)) {
+
     gwas_data$xpos <- gwas_data$BP
     axis_df <- NULL
     x_label <- paste0(chr, " position (bp)")
+
   } else {
+
     gwas_data$CHR <- factor(gwas_data$CHR, levels = unique(gwas_data$CHR))
     gwas_data <- gwas_data[order(gwas_data$CHR, gwas_data$BP), ]
 
     chr_lengths <- tapply(gwas_data$BP, gwas_data$CHR, max)
-    chr_offsets <- c(0, cumsum(as.numeric(chr_lengths))[-length(chr_lengths)])
+    chr_offsets <- c(0, cumsum(chr_lengths)[-length(chr_lengths)])
     names(chr_offsets) <- names(chr_lengths)
 
     gwas_data$xpos <- gwas_data$BP + chr_offsets[as.character(gwas_data$CHR)]
@@ -228,15 +126,11 @@ manhattan_plot <- function(gwas_file,
 
   logp_threshold <- -log10(p_threshold)
 
-  # -----------------------------
-  # Plot
-  # -----------------------------
-  p <- ggplot(gwas_data, aes(x = gwas_data$xpos, y = gwas_data$logp)) +
-    geom_point(
-      aes(color = gwas_data$CHR),
-      alpha = 0.6,
-      size = 0.7
-    ) +
+  ## ---------------------------
+  ## Plot
+  ## ---------------------------
+  p <- ggplot(gwas_data, aes(x = xpos, y = logp)) +
+    geom_point(aes(color = CHR), alpha = 0.6, size = 0.7) +
     geom_hline(
       yintercept = logp_threshold,
       color = "red",
@@ -251,10 +145,8 @@ manhattan_plot <- function(gwas_file,
     theme(
       plot.title = element_text(face = "bold", hjust = 0.5),
       axis.title = element_text(face = "bold"),
-      axis.text = element_text(color = "black"),
       panel.grid.minor = element_blank(),
-      legend.position = "none",
-      axis.text.x = element_text()
+      legend.position = "none"
     )
 
   if (is.null(chr)) {

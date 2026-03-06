@@ -5,18 +5,21 @@
 \title{Summary of Stoat snarl analysis}
 \usage{
 summary_stoat(
-  input,
+  gwas_file,
   number_top_var = 100,
-  p_sig = 1e-05,
+  p_column = "P",
+  p_threshold = 1e-05,
   output = "top_variant.tsv"
 )
 }
 \arguments{
-\item{input}{Path to the output stoat GWAS TSV file..}
+\item{gwas_file}{Path to the output stoat GWAS TSV file..}
 
 \item{number_top_var}{Number of top variant print in the output top variant file [string] (default : 100).}
 
-\item{p_sig}{P-value threshold [numeric] (default : 1e-5).}
+\item{p_column}{Column name to use for p-values (default: "P").}
+
+\item{p_threshold}{P-value threshold [numeric] (default : 1e-5).}
 
 \item{output}{Path/Name of the top variant output file [string] (default : "top_variant.tsv").}
 }

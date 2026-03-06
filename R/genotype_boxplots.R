@@ -38,7 +38,7 @@ genotype_boxplots <- function(genotype_file,
 
   # -----------------------------
   # Read phenotype file
-  # and validate format
+  #  and validate format
   # -----------------------------
   pheno_data <- read.table(
     phenotype_file,
@@ -49,12 +49,14 @@ genotype_boxplots <- function(genotype_file,
     check.names = FALSE
   )
 
-  stopifnot(all(c("IID", "PHENO") %in% colnames(pheno_data)))
+  pheno_data <- pheno_data[
+    rep(seq_len(nrow(pheno_data)), each = 2),
+  ]
 
-  # stop is file is empty or only has header
-  if (nrow(pheno_data) == 0) {
-    stop("Phenotype file is empty or only has header.")
-  }
+  pheno_data$SAMPLE <- paste0(
+    pheno_data$SAMPLE,
+    ifelse(seq_len(nrow(pheno_data)) %% 2 == 1, "_h1#", "_h0#")
+  )
 
   # -----------------------------
   # Read header Genotype file
@@ -67,7 +69,7 @@ genotype_boxplots <- function(genotype_file,
 
   repeat {
     line <- readLines(con, n = 1)
-    if (length(line) == 0) break  # end of file
+    if (length(line) == 0) break # end of file
     line_count <- line_count + 1
 
     if (grepl("^#START_NODE\\b", line)) {
@@ -92,7 +94,7 @@ genotype_boxplots <- function(genotype_file,
   expected_cols <- c(
     "START_NODE",
     "END_NODE",
-    "REF_INDEX",
+    "REF",
     "START_OFFSET",
     "END_OFFSET",
     "DEPTH",
@@ -129,13 +131,13 @@ genotype_boxplots <- function(genotype_file,
   # Create snarl ID
   # -----------------------------
   target_start <- node_start
-  target_end   <- node_end
+  target_end <- node_end
 
   # Filter directly (no SNARL_ID column needed)
   geno_data <- geno_data[
     geno_data$START_NODE == target_start &
-    geno_data$END_NODE   == target_end,
-    ,drop = FALSE
+      geno_data$END_NODE == target_end, ,
+    drop = FALSE
   ]
 
   if (nrow(geno_data) == 0) {
@@ -168,7 +170,7 @@ genotype_boxplots <- function(genotype_file,
     mutate(across(all_of(genotype_columns), as.character)) %>%
     pivot_longer(
       cols = all_of(genotype_columns),
-      names_to = "IID",
+      names_to = "SAMPLE",
       values_to = "GT"
     ) %>%
     mutate(
@@ -180,29 +182,36 @@ genotype_boxplots <- function(genotype_file,
   # -----------------------------
   # Merge with phenotype
   # -----------------------------
-  missing_in_pheno <- setdiff(genotype_columns, pheno_data$IID)
+  # Samples missing in phenotype → warning only
+  missing_in_pheno <- setdiff(genotype_columns, pheno_data$SAMPLE)
+
   if (length(missing_in_pheno) > 0) {
-    stop(
+    warning(
       sprintf(
-        "ERROR: Missing samples in phenotype file: %s",
+        "Samples not found in phenotype file: %s",
         paste(missing_in_pheno, collapse = ", ")
       )
     )
   }
 
-  missing_in_geno <- setdiff(pheno_data$IID, genotype_columns)
+  # Samples present in phenotype but not in genotype → warning
+  missing_in_geno <- setdiff(pheno_data$SAMPLE, genotype_columns)
+
   if (length(missing_in_geno) > 0) {
     warning(
       sprintf(
-        "WARNING: Phenotype samples not in genotype file: %s",
+        "Phenotype samples not found in genotype file: %s",
         paste(missing_in_geno, collapse = ", ")
       )
     )
   }
 
+  # -----------------------------
+  # Merge correctly
+  # -----------------------------
   merged_data <- geno_long %>%
-    left_join(pheno_data, by = "IID") %>%
-    filter(!is.na(.data$PHENO))
+    dplyr::left_join(pheno_data, by = "SAMPLE") %>%
+    dplyr::filter(!is.na(.data$PHENO))
 
   # -----------------------------
   # Count genotypes
