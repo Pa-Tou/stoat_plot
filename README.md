@@ -89,11 +89,11 @@ genotype_boxplots(
 # Print summary
 summary_stoat(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
   number_top_var=20, p_column="P_CHI2", p_threshold=0.001, 
-  output = "top_variant.chi2.filtered.png")
+  output = "top_variant.chi2.filtered.tsv")
 
 # Print summary
 summary_stoat(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
-  p_column="P_CHI2", output ="top_variant.chi2.png")
+  p_column="P_CHI2", output ="top_variant.chi2.tsv")
 
 manhattan_plot(gwas_file=file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
   p_column="P_CHI2", chr="ref", start=43046, end=129765, p_threshold=1e-3, 

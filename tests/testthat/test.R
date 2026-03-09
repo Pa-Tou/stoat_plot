@@ -20,8 +20,9 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     summary_stoat(
-      file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
-      output = file.path(out_dir, "summary.txt")
+      file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+      output = file.path(out_dir, "summary.txt"),
+      p_column="P_CHI2"
     ),
     NA
   )
@@ -31,8 +32,9 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     manhattan_plot(
-      file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
-      output = file.path(out_dir, "manhattan.png")
+      file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+      output = file.path(out_dir, "manhattan.png"),
+      p_column="P_CHI2"
     ),
     NA
   )
@@ -42,8 +44,9 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     qq_plot(
-      file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
-      output = file.path(out_dir, "qq.png")
+      file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+      output = file.path(out_dir, "qq.png"),
+      p_column="P_CHI2"
     ),
     NA
   )
@@ -53,9 +56,10 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     plot_pvalue_hist(
-      file.path(test_data_dir, "gwas", "pg.gwas.tsv"),
+      file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
       min = 1e-5,
       max = 0.5,
+      p_column="P_CHI2",
       output = file.path(out_dir, "pval_hist.png")
     ),
     NA
@@ -66,8 +70,8 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     genotype_boxplots(
-      file.path(test_data_dir, "genotype", "pg.snarl.tsv"),
-      file.path(test_data_dir, "phenotype", "binary_phenotype_samples.tsv"),
+      file.path(test_data_dir, "genotype", "binary.genotype.tsv"),
+      file.path(test_data_dir, "phenotype", "binary.phenotype.tsv"),
       "<4252",
       ">4249",
       output = file.path(out_dir, "boxplots.png")
@@ -80,7 +84,7 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     path_length_distribution(
-      file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"),
+      file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"),
       output = file.path(out_dir, "path_length.png")
     ),
     NA
@@ -91,7 +95,7 @@ test_that("StoatPlot main functions run without errors", {
   # -------------------------
   expect_error(
     snarl_type_histogram(
-      file.path(test_data_dir, "snarl_paths", "new_binary_snarl_paths.tsv"),
+      file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"),
       output = file.path(out_dir, "snarl_type.png")
     ),
     NA
