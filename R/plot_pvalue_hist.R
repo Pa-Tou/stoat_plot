@@ -9,7 +9,7 @@
 #' @param output Filename to save the output plot (default: "pvalue_distribution_plot.png").
 #' @param min Minimun P-value threshold to include in the plot (default: 0).
 #' @param max Maximum P-value threshold to include in the plot (default: 1.0).
-#' @param bin Number of bins in the histogram (default: 200).
+#' @param bins Number of bins in the histogram (default: 200).
 #' @param p_column Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
 #'
 #' @return Saves a histogram plot as an image file.

@@ -96,9 +96,9 @@ snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
 plot <- ggplot(
   variant_counts,
   aes(
-    x = Variant_Type,
-    y = Count,
-    fill = Variant_Type
+    x = .data$Variant_Type,
+    y = .data$Count,
+    fill = .data$Variant_Type
   )
 ) +
   geom_bar(

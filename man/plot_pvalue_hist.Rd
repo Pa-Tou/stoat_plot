@@ -22,9 +22,9 @@ plot_pvalue_hist(
 
 \item{max}{Maximum P-value threshold to include in the plot (default: 1.0).}
 
-\item{output}{Filename to save the output plot (default: "pvalue_distribution_plot.png").}
+\item{bins}{Number of bins in the histogram (default: 200).}
 
-\item{bin}{Number of bins in the histogram (default: 200).}
+\item{output}{Filename to save the output plot (default: "pvalue_distribution_plot.png").}
 }
 \value{
 Saves a histogram plot as an image file.
