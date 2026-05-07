@@ -15,8 +15,8 @@
 #' @param input Path to the input GWAS TSV file.
 #' @param p_column Column name to use for p-values (default: "P").
 #' @param chr Optional column name for chromosome (default: NULL, will try "CHR").
-#' @param start Optional column name for start positions (default: NULL, will try "START_POS").
-#' @param end Optional column name for end positions (default: NULL, will try "END_POS").
+#' @param start Optional column name for start positions (default: NULL, will try "START_OFFSET").
+#' @param end Optional column name for end positions (default: NULL, will try "END_OFFSET").
 #' @param p_threshold P-value threshold for the horizontal significance line (default: 1e-5).
 #' @param output Path to save the output plot image.
 #'
@@ -67,17 +67,17 @@ manhattan_plot <- function(input,
     stop(paste("Column:", p_column, "not found in the input file."))
   }
 
-  if (!("START_POS" %in% colnames(data))) {
-    stop("Input file must contain column: 'START_POS'")
+  if (!("START_OFFSET" %in% colnames(data))) {
+    stop("Input file must contain column: 'START_OFFSET'")
   }
 
   # -----------------------------
   # Prepare data
   # -----------------------------
-  data$START_POS <- as.integer(data$START_POS)
+  data$START_OFFSET <- as.integer(data$START_OFFSET)
   data$P <- pmax(as.numeric(data[[p_column]]), 1e-300)
 
-  data <- data[!is.na(data$START_POS) & !is.na(data$P), ]
+  data <- data[!is.na(data$START_OFFSET) & !is.na(data$P), ]
 
   # Assign chromosome
   #if (!is.null(chr)) {
@@ -92,11 +92,11 @@ manhattan_plot <- function(input,
   # Genomic filters
   # -----------------------------
   if (!is.null(start)) {
-    data <- data[data$START_POS >= start, ]
+    data <- data[data$START_OFFSET >= start, ]
   }
 
   if (!is.null(end)) {
-    data <- data[data$START_POS <= end, ]
+    data <- data[data$START_OFFSET <= end, ]
   }
 
   if (!is.null(start) && !is.null(end) && start > end) {
@@ -108,12 +108,13 @@ manhattan_plot <- function(input,
   # -----------------------------
   data <- data.frame(
     CHR = data$CHR,
-    BP = data$START_POS,
+    BP = data$START_OFFSET,
     P = data$P,
     stringsAsFactors = FALSE
   )
 
   data$logp <- -log10(data$P)
+
 
   # -----------------------------
   # X-axis handling
@@ -183,6 +184,7 @@ manhattan_plot <- function(input,
           c("cadetblue3", "darkcyan"),
           length.out = length(levels(data$CHR))
         )
+
       )
   }
 
@@ -192,5 +194,5 @@ manhattan_plot <- function(input,
 # If this is called as a script, do this. I think this will prevent it from being called when just importing the file
 if (sys.nframe() == 0){
     library(tidyverse)
-    manhattan_plot(commandArgs(TRUE)[1])
+    manhattan_plot(commandArgs(TRUE)[1], output=commandArgs(TRUE)[2])
 }
