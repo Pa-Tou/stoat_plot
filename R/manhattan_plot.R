@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 # Run as:
 # ./manhattan_plot.R [input file from stoat]  
 # Writes file manhattan_plot.png to current directory
@@ -124,7 +124,7 @@ manhattan_plot <- function(input,
     axis_df <- NULL
     x_label <- paste0(chr, " position (bp)")
   } else {
-    data$CHR <- factor(data$CHR, levels = sort(unique(data$CHR)))
+    data$CHR <- factor(data$CHR, levels = mixedsort(unique(data$CHR)))
     data <- data[order(data$CHR, data$BP), ]
 
     chr_lengths <- tapply(data$BP, data$CHR, max)
@@ -190,5 +190,6 @@ manhattan_plot <- function(input,
 # If this is called as a script, do this. I think this will prevent it from being called when just importing the file
 if (sys.nframe() == 0){
     library(tidyverse)
+    library(gtools)
     manhattan_plot(commandArgs(TRUE)[1], output=commandArgs(TRUE)[2])
 }
