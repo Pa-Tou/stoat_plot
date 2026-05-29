@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #' Q-Q Plot for GWAS Results
 #' @description Generate QQ plot from STOAT GWAS results using P or P_CHI2 column.
 #'
@@ -12,15 +14,15 @@
 #' @name qq_plot
 #' @export
 
-qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
+qq_plot <- function(input, column_names = "P_CHI2", output = "qq_plot.png") {
 
   # Read all lines
   lines <- readLines(input)
 
-  # Identify the header line (starts with #START_NODE)
-  header_idx <- grep("^#START_NODE", lines)
+  # Identify the header line (starts with #CHR)
+  header_idx <- grep("^#CHR", lines)
   if (length(header_idx) == 0) {
-    stop("Header line '#START_NODE' not found in the file.")
+    stop("Header line '#CHR' not found in the file.")
   }
 
   # Extract header and clean '#'
@@ -96,4 +98,11 @@ qq_plot <- function(input, column_names = "P", output = "qq_plot.png") {
     )
 
   ggsave(output, plot = p, width = 6, height = 6)
+}
+
+# If this is called as a script, do this. I think this will prevent it from being called when just importing the file
+if (sys.nframe() == 0){
+    library(tidyverse)
+    library(gtools)
+    qq_plot(commandArgs(TRUE)[1], output=commandArgs(TRUE)[2])
 }
