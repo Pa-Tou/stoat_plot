@@ -29,7 +29,7 @@ manhattan_plot <- function(input,
                             chr = NULL,
                             start = NULL,
                             end = NULL,
-                            p_threshold = 1e-5,
+                            p_threshold = 1.3072e-05,
                             output = "manhattan_plot.png") {
 
   # -----------------------------
@@ -124,7 +124,7 @@ manhattan_plot <- function(input,
     axis_df <- NULL
     x_label <- paste0(chr, " position (bp)")
   } else {
-    data$CHR <- factor(data$CHR, levels = unique(data$CHR))
+    data$CHR <- factor(data$CHR, levels = sort(unique(data$CHR)))
     data <- data[order(data$CHR, data$BP), ]
 
     chr_lengths <- tapply(data$BP, data$CHR, max)
@@ -139,7 +139,7 @@ manhattan_plot <- function(input,
       FUN = function(x) mean(range(x))
     )
 
-    x_label <- "Chromosome"
+    x_label <- "Position (Mbp)"
   }
 
   logp_threshold <- -log10(p_threshold)
@@ -147,7 +147,7 @@ manhattan_plot <- function(input,
   # -----------------------------
   # Plot
   # -----------------------------
-  p <- ggplot(data, aes(x = data$xpos, y = data$logp)) +
+  p <- ggplot(data, aes(x = data$BP/1e6, y = data$logp)) +
     geom_point(
       aes(color = data$CHR),
       alpha = 0.6,
@@ -158,6 +158,7 @@ manhattan_plot <- function(input,
       color = "red",
       linetype = "dashed"
     ) +
+    facet_grid(.~CHR, scales="free", space="free") + 
     labs(
       x = x_label,
       y = expression(-log[10](P)),
@@ -173,12 +174,7 @@ manhattan_plot <- function(input,
       axis.text.x = element_text(angle = 90, vjust = 0.5, size = 10)
     )
 
-  if (is.null(chr)) {
-    p <- p +
-      scale_x_continuous(
-        breaks = axis_df$xpos,
-        labels = axis_df$CHR
-      ) +
+  if (is.null(chr)) {	    p <- p +
       scale_color_manual(
         values = rep(
           c("cadetblue3", "darkcyan"),
