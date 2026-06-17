@@ -51,6 +51,9 @@ jobs:
             ggplot2
             dplyr
             tidyr
+            data.table
+            gtools
+            plotly
           needs: coverage
 
       - name: Check R package

@@ -15,10 +15,13 @@ Imports:
     magrittr,
     utils,
     stats,
-    rlang
+    rlang,
+    data.table,
+    gtools
 RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0),
-    withr
+    withr,
+    plotly
 Config/testthat/edition: 3
 Config/dockerfile: Dockerfile
