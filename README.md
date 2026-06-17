@@ -5,7 +5,7 @@
 <!-- Uncomment when we realse
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Pa-Tou/stoat_plot)](https://github.com/Pa-Tou/stoat_plot/releases/latest) 
 -->
-[![Docker Repository on Quay](https://quay.io/repository/Pa-Tou/stoat_plot/status "Docker Repository on Quay")](https://quay.io/repository/Plogeur/stoatplot)
+[![Docker Repository on Quay](https://quay.io/repository/Pa-Tou/stoat_plot/status "Docker Repository on Quay")](https://quay.io/repository/patou/stoat_plot)
 
 ## Overview
 
