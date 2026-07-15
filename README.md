@@ -20,8 +20,6 @@
 
 These tools facilitate the visual inspection of association signals and support downstream interpretation of GWAS outputs.
 
----
-
 ## Installation
 
 <!-- DEV COMMAND
@@ -49,8 +47,6 @@ devtools::install_github("Pa-Tou/stoat_plot")
 
 > If you are installing locally from source, make sure you have the required dependencies listed in the `DESCRIPTION` file.
 
----
-
 ## Functions
 
 ### Visualization Function
@@ -65,13 +61,9 @@ devtools::install_github("Pa-Tou/stoat_plot")
 | `path_length_distribution()`    | Dot Plot of Path Length Frequencies                |
 | `snarl_type_histogram()`        | Dot Plot of snarl type histogram                   |
 
----
-
 ## Example Usage
 
 ```r
-devtools::document()
-devtools::install()
 library(StoatPlot)
 
 # Define path to package test data
@@ -122,21 +114,17 @@ path_length_distribution(file.path(test_data_dir, "snarl_paths", "binary.snarl.t
 snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"))
 ```
 
----
+## Sorting and indexing snarl genotypes
 
-## Dependencies
+To speed up the visualization of associations, `genotype_boxplots` extracts the relevant genotypes from an indexed and bgzipped TSV file. 
+To index a `snarl_genotypes.tsv.gz` (output of `stoat vcf` or `stoat graph`) with `bgzip` and `tabix`:
 
-This package imports:
+```sh
+(zcat snarl_genotypes.tsv.gz | head -10000 | grep "^#"; zgrep -v "^#" snarl_genotypes.tsv.gz | sort -k3,3n -k4,4n -k5,5n) | bgzip > snarl_genotypes.sorted.tsv.gz
+tabix -f -c "#" -s 3 -b 4 -e 5 snarl_genotypes.sorted.tsv.gz
+```
 
-* `ggplot2`
-* `dplyr`
-* `tools`
-* `tidyr`
-* `utils`
-
-Make sure these packages are installed before using `stoatPlot`.
-
----
+You can then use the `snarl_genotypes.sorted.tsv.gz` file as input to the `genotype_boxplots` function (*genotype_file* parameter).
 
 ## Contributing
 

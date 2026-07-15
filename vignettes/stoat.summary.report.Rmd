@@ -1,0 +1,78 @@
+---
+title: STOAT Plot overview
+author: Jean Monlong
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette: default
+  github_document: default
+vignette: >
+  %\VignetteIndexEntry{custom-association-test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(StoatPlot)
+library(ggplot2)
+library(dplyr)
+library(knitr)
+```
+
+## Import association results
+
+```{r import}
+## path to association file (~stoat.assoc.pvalues.tsv.gz)
+test_data_dir <- system.file('extdata', package='StoatPlot')
+assoc_file = file.path(test_data_dir, 'stoat.quantitative.assoc.pvalues.tsv.gz')
+
+## import association results
+assoc = import_assoc(assoc_file)
+```
+
+## Summary
+
+```{r, results='asis'}
+sum.l = summary_stoat(assoc)
+```
+
+## QQ-plot
+
+```{r qqplot, fig.width=7, fig.height=6}
+qq_plot(assoc)
+```
+
+## Manhattan plot
+
+```{r manhplot, fig.width=8, fig.height=3}
+manhattan_plot(assoc, show_top_points=1000)
+```
+
+## Top-associated variants
+
+```{r}
+assoc |> arrange(P) |> head(10) |> kable()
+```
+
+## Make a plot for the top association
+
+```{r}
+## prepare file names for the genotypes and phenotype
+gt_fn = file.path(test_data_dir, 'snarl_genotypes.sorted.tsv.gz')
+pheno_fn = file.path(test_data_dir, 'phenotype.quantitative.tsv')
+
+## get the most associated variant
+top.assoc = assoc |> arrange(P) |> head(1)
+
+## boxplot with samples grouped by genotype
+genotype_boxplots(gt_fn, pheno_fn, top.assoc)
+
+## boxplot with samples grouped by allele
+genotype_boxplots(gt_fn, pheno_fn, top.assoc, by_allele=TRUE)
+```

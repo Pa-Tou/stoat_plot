@@ -1,0 +1,116 @@
+---
+title: "Using a custom statistical test"
+author: Jean Monlong
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{custom-association-test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(StoatPlot)
+library(dplyr)
+library(knitr) ## for table outputs
+library(ggplot2)
+library(car) ## to test for specific coeff in regression
+```
+
+We use the small test data from the package.
+
+```{r}
+test_data_dir <- system.file('extdata', package='StoatPlot')
+gt_fn = file.path(test_data_dir, 'snarl_genotypes.sorted.tsv.gz')
+pheno_fn = file.path(test_data_dir, 'phenotype.quantitative.tsv')
+```
+
+## Read the phenotype file
+
+```{r}
+pheno = readr::read_tsv(pheno_fn)
+
+pheno |> head() |> kable()
+```
+
+## Make two random covariables
+
+```{r}
+covars = tibble(SAMPLE=pheno$SAMPLE,
+                sex=sample(0:1, nrow(pheno), replace=TRUE),
+                PC1=rnorm(nrow(pheno)))
+```
+
+## Extract snarls in a region
+
+The genotype matrix can get very big and we don't necessarily want to load it entirely in memory. 
+Instead, we can load the snarl information in chunks.
+
+Let's extract the snarls overlapping `ref:20000-50000`.
+
+```{r}
+chunk.l = import_genotype_chunk(gt_fn, 'ref', 20000, 50000)
+length(chunk.l)
+```
+
+## Building a test table for one snarl
+
+Let's take the first snarl info and make a test table by combining with the phenotype.
+
+```{r}
+df = combine_chunk_phenotype_covars(chunk.l[[1]]$GT, pheno, covars)
+
+df |> head() |> kable()
+```
+
+This table could be used for a test, for example fitting a regression model.
+
+In STOAT, we also preprocess it a bit to remove constant variables, obvious colinearity.
+The *sample* column is also not used in the regression.
+We've created a function to mimick the table preparation used by STOAT.
+
+```{r}
+df = preprocess_test_table(df)
+
+df |> head() |> kable()
+```
+
+Now the table only contains:
+
+- a `phenotype` variable
+- one or several *allele* variables prefixed by `al`
+- one or several *covariables* prefixed by `covar`
+
+In STOAT, we fit a model and test if any of the coefficients for the *allele* variables are different from 0.
+
+## Compute p-values using linear regression
+
+For example, let's compute a pvalue by fitting a linear regression model for each snarl.
+
+```{r}
+pv.df = lapply(chunk.l, function(snarl_info) {
+  ## combine allele count with the phenotype
+  df = combine_chunk_phenotype_covars(snarl_info$GT, pheno, covars)
+  df = preprocess_test_table(df)
+
+  ## run the regression
+  model = lm(phenotype ~ ., data=df)
+  ## null hypothesis is all allele coeffs are 0
+  null.h = paste0(grep('^al', colnames(df), value=TRUE), '=0')
+  lh.o = linearHypothesis(model, null.h)
+  pv = lh.o[['Pr(>F)']][2]
+
+  ## return a data.frame with the snarl information and the test result
+  return(tibble(START_NODE=snarl_info$START_NODE, END_NODE=snarl_info$END_NODE,
+                P=pv))
+}) |> bind_rows()
+
+pv.df |> head() |> kable()
+```
