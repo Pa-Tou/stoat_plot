@@ -2,10 +2,11 @@
 
 [![R-CMD-check](https://github.com/Pa-Tou/stoat_plot/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pa-Tou/stoat_plot/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/Pa-Tou/stoat_plot/branch/main/graph/badge.svg)](https://codecov.io/gh/Pa-Tou/stoat_plot)
+[![Docker Repository on Quay](https://quay.io/repository/patou/stoat_plot/status "Docker Repository on Quay")](https://quay.io/repository/patou/stoat_plot)
+<<<<<<< HEAD
 <!-- Uncomment when we release
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Pa-Tou/stoat_plot)](https://github.com/Pa-Tou/stoat_plot/releases/latest) 
 -->
-[![Docker Repository on Quay](https://quay.io/repository/Pa-Tou/stoat_plot/status "Docker Repository on Quay")](https://quay.io/repository/Plogeur/stoatplot)
 
 ## Overview
 
