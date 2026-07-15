@@ -15,7 +15,7 @@
 #' @export
 
 path_length_distribution <- function(snarl_file, min = 0, max = Inf,
-                                      output = "path_length_dot_ecdf.png") {
+                                      output = NULL) {
 
   con <- file(snarl_file, "r")
   on.exit(close(con))
@@ -111,7 +111,10 @@ path_length_distribution <- function(snarl_file, min = 0, max = Inf,
       panel.grid.minor = element_blank()
   )
 
-  # Save plot
-  ggsave(output, plot = p, width = 8, height = 5)
+  ## Save plot
+  if (!is.null(output)) {
+    ggsave(output, plot = p, width = 8, height = 5)
+  }
 
+  return(p)
 }

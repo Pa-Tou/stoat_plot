@@ -4,7 +4,7 @@
 \alias{snarl_type_histogram}
 \title{Dot Plot of snarl type histogram}
 \usage{
-snarl_type_histogram(input, output = "snarl_type_histogram.png")
+snarl_type_histogram(input, output = NULL)
 }
 \arguments{
 \item{input}{Path to the input TSV file.}

@@ -9,6 +9,13 @@
 #' @return In addition to printing the summary metrics, returns a list with the values
 #' 
 #' @name summary_stoat
+#' @examples
+#' # prepare the filename
+#' assoc_file = system.file('extdata/stoat.quantitative.assoc.pvalues.tsv.gz', package='StoatPlot')
+#'
+#' # print a summary
+#' sum.l = summary_stoat(assoc_file)
+#' sum.l 
 #' @export
 
 summary_stoat <- function(assoc) {

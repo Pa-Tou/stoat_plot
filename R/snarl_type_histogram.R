@@ -12,7 +12,7 @@
 #' @name snarl_type_histogram
 #' @export
 
-snarl_type_histogram <- function(input, output = "snarl_type_histogram.png") {
+snarl_type_histogram <- function(input, output = NULL) {
 
   con <- file(input, "r")
   on.exit(close(con))
@@ -128,5 +128,10 @@ plot <- ggplot(
       SV  = "slateblue4"
     )
   )
-  ggsave(output, plot, width = 6, height = 4)
+
+  if (!is.null(output)) {
+    ggsave(output, plot, width = 6, height = 4)
+  }
+
+  return(plot)
 }

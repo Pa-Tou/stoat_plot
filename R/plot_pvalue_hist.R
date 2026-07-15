@@ -21,7 +21,7 @@ plot_pvalue_hist <- function(gwas_file,
                              min = 0,
                              max = 1.0,
                              bins = 100,
-                             output = "pvalue_distribution_plot.png") {
+                             output = NULL) {
 
   ## ---------------------------
   ## Input checks
@@ -100,5 +100,9 @@ plot_pvalue_hist <- function(gwas_file,
       y = "Frequency"
     )
 
-  ggplot2::ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
+  if(!is.null(output)) {
+    ggplot2::ggsave(output, plot = p, width = 8, height = 6, dpi = 300)
+  }
+
+  return(p)
 }

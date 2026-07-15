@@ -1,0 +1,11 @@
+^doc$
+^Meta$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^Dockerfile
+^Makefile
+^dwl_data
+^install.R
+^.github
+^misc

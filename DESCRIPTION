@@ -1,8 +1,12 @@
 Package: StoatPlot
 Title: Tools for Visualizing STOAT GWAS Results
 Version: 0.1.0
-Authors@R: person("Matis", "Alias-Bagarre", email = "matis.alias-bagarre@inserm.fr", role = c("aut", "cre"))
+Authors@R: c(
+    person("Jean", "Monlong", email = "jean.monlong@inserm.fr", role = c("aut")),
+    person("Matis", "Alias-Bagarre", email = "matis.alias-bagarre@inserm.fr", role = c("aut", "cre"))
+    )
 Description: R tools for summary, Q-Q plots, Manhattan plots, and genotype-based boxplots in STOAT GWAS.
+URL: https://pa-tou.github.io/stoat_plot/
 License: GPL-3 + file LICENSE
 Depends: R (>= 3.4.4)
 Encoding: UTF-8
@@ -32,3 +36,6 @@ Suggests:
 Config/testthat/edition: 3
 Config/dockerfile: Dockerfile
 VignetteBuilder: knitr
+Vignettes:
+    intro: STOAT Plot overview (\code{intro.Rmd})
+    using-custom-test: Using custom association tests (\code{using-custom-test.Rmd})

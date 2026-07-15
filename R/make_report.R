@@ -1,10 +1,10 @@
-#' General a summary report
+#' General a summary report.
 #' @description An HTML file will be created in the working directory.
 #' @param assoc_file path to the association file
 #' @param output_html_file path for the output HTML file
 #' @param force_overwrite should existing Rmd/HTML output file be overwritten?
 #' @return a character with the report filename
-#' @name genotype_boxplots
+#' @name make_report
 #' @export
 make_report <- function(assoc_file, output_html_file='stoat.summary.report.html',
                         force_overwrite=FALSE) {

@@ -15,3 +15,11 @@ In addition to printing the summary metrics, returns a list with the values
 \description{
 Print a few summary metrics from the association results
 }
+\examples{
+# prepare the filename
+assoc_file = system.file('extdata/stoat.quantitative.assoc.pvalues.tsv.gz', package='StoatPlot')
+
+# print a summary
+sum.l = summary_stoat(assoc_file)
+sum.l 
+}

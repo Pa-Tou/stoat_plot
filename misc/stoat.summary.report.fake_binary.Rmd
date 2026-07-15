@@ -1,0 +1,49 @@
+---
+title: STOAT summary report on a fake binary phenotype
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, fig.width=8)
+```
+
+```{r}
+library(StoatPlot)
+library(ggplot2)
+library(dplyr)
+
+## path to association file (~stoat.assoc.pvalues.tsv.gz)
+assoc_file = '../dwl_data/stoat.fake_binary.assoc.pvalues.tsv.gz'
+
+## import association results
+assoc = import_assoc(assoc_file)
+```
+
+## Summary
+
+```{r, results='asis'}
+sum.l = summary_stoat(assoc)
+```
+
+## QQ-plot
+
+```{r qqplot, fig.width=7, fig.height=6}
+qq_plot(assoc)
+```
+
+## Manhattan plot
+
+```{r manhplot, fig.width=8, fig.height=3}
+manhattan_plot(assoc, show_top_points=1000)
+```
+
+Two-rows version
+
+```{r manhplot_2rows, fig.height=6}
+manhattan_plot(assoc, show_top_points=1000, wrap_by_rows=2)
+```
+
+## Top-associated variants
+
+```{r}
+assoc |> arrange(P) |> head(10)
+```

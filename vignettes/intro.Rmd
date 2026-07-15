@@ -1,12 +1,12 @@
 ---
-title: STOAT Plot overview
+title: "STOAT Plot overview"
 author: Jean Monlong
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette: default
   github_document: default
 vignette: >
-  %\VignetteIndexEntry{custom-association-test}
+  %\VignetteIndexEntry{STOAT Plot overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -75,4 +75,22 @@ genotype_boxplots(gt_fn, pheno_fn, top.assoc)
 
 ## boxplot with samples grouped by allele
 genotype_boxplots(gt_fn, pheno_fn, top.assoc, by_allele=TRUE)
+```
+
+## Other graphs
+
+```{r}
+# Histogram of p-values
+plot_pvalue_hist(
+  file.path(test_data_dir, "gwas", "binary.assoc.chi2.tsv"),
+  p_column="P_CHI2",
+  min = 0.00001,
+  max = 0.5
+)
+
+# Dot plot of Path Length Frequencies
+path_length_distribution(file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"))
+
+# Snarl type histogram
+snarl_type_histogram(file.path(test_data_dir, "snarl_paths", "binary.snarl.tsv"))
 ```

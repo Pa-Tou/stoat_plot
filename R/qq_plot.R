@@ -9,6 +9,12 @@
 #'
 #' @return a ggplot object. Saves a file too if output_file is provided.
 #' @name qq_plot
+#' @examples
+#' # prepare the filename
+#' assoc_file = system.file('extdata/stoat.quantitative.assoc.pvalues.tsv.gz', package='StoatPlot')
+#'
+#' # make the QQ-plot
+#' qq_plot(assoc_file)
 #' @export
 
 qq_plot <- function(assoc, output_file=NULL) {

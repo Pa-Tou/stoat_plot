@@ -4,11 +4,8 @@
 \name{StoatPlot-package}
 \alias{StoatPlot}
 \alias{StoatPlot-package}
-\title{Visualization of STOAT results}
+\title{Visualize the results from STOAT}
 \description{
-Visualize the results from STOAT
-}
-\details{
 \tabular{ll}{
 Package: \tab StoatPlot\cr
 Type: \tab Package\cr
@@ -23,8 +20,23 @@ assoc = import_assoc('stoat.assoc.pvalues.tsv.gz')
 }
 }
 \seealso{
+Useful links:
+\itemize{
+  \item \url{https://pa-tou.github.io/stoat_plot/}
+}
+
+
 \url{http://www.github.com/pa-tou/stoat_plot}
 }
 \author{
+\strong{Maintainer}: Matis Alias-Bagarre \email{matis.alias-bagarre@inserm.fr}
+
+Authors:
+\itemize{
+  \item Jean Monlong \email{jean.monlong@inserm.fr}
+}
+
+
 Jean Monlong \email{jmonlong@ucsc.edu}
 }
+\keyword{internal}

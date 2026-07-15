@@ -2,9 +2,11 @@
 title: "Using a custom statistical test"
 author: Jean Monlong
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette: default
+  github_document: default
 vignette: >
-  %\VignetteIndexEntry{custom-association-test}
+  %\VignetteIndexEntry{Using a custom statistical test}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

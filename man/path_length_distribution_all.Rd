@@ -5,12 +5,7 @@
 \alias{path_length_distribution}
 \title{Path Length Distribution Plots for STOAT}
 \usage{
-path_length_distribution(
-  snarl_file,
-  min = 0,
-  max = Inf,
-  output = "path_length_dot_ecdf.png"
-)
+path_length_distribution(snarl_file, min = 0, max = Inf, output = NULL)
 }
 \arguments{
 \item{snarl_file}{Path to the snarl_file TSV file.}

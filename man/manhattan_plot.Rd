@@ -38,3 +38,19 @@ A ggplot object. Saves a file if output_file is provided.
 \description{
 Generate a Manhattan plot showing the p-values across the pangenome.
 }
+\examples{
+# prepare the filename
+assoc_file = system.file('extdata/stoat.quantitative.assoc.pvalues.tsv.gz', package='StoatPlot')
+
+# manhattan plot from the filename (will load the file internally)
+manhattan_plot(assoc_file, show_top_points=1000)
+
+# -------------------------------------
+
+# import the association results first
+assoc = import_assoc(assoc_file)
+
+# then do a Manhattan plot (recommended for large dataset).
+# Also change the P-value threshold
+manhattan_plot(assoc_file, p_threshold=1e-3)
+}

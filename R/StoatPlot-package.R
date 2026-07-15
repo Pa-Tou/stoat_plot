@@ -7,7 +7,11 @@
 #' Date: \tab 2026-06-07\cr
 #' License: \tab MIT\cr
 #' }
-#' @docType package
+#'
+
+#' @keywords internal 
+"_PACKAGE"
+
 #' @name StoatPlot-package
 #' @title Visualization of STOAT results
 #' @author Jean Monlong \email{jmonlong@ucsc.edu}

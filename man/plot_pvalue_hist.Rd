@@ -10,7 +10,7 @@ plot_pvalue_hist(
   min = 0,
   max = 1,
   bins = 100,
-  output = "pvalue_distribution_plot.png"
+  output = NULL
 )
 }
 \arguments{
