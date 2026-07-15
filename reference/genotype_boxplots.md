@@ -1,0 +1,54 @@
+# Genotype vs phenotype boxplots
+
+Generates boxplots to illustrate an association, showing the phenotype
+distribution for each genotype group.
+
+The queried association can be provided either with a list or a
+data.frame. If a list is provided as input, it must contain the
+following variables: 'CHR', 'START_OFFSET', 'START_NODE', 'END_NODE'.
+This information can be found in the TSV files produced by Stoat (either
+the snarl information or the association results). If the input is a
+data.frame, only the first row will be used to extract those same
+information. In practice, this input data.frame could be one row of the
+association data.frame loaded by \*import_assoc\*.
+
+## Usage
+
+``` r
+genotype_boxplots(
+  genotype_file,
+  phenotype,
+  assoc_query,
+  output_file = NULL,
+  by_allele = FALSE
+)
+```
+
+## Arguments
+
+- genotype_file:
+
+  path to the snarl genotype file (sorted and indexed with tabix)
+
+- phenotype:
+
+  Either a data.frame with the phenotype for each sample, or the path to
+  the phenotype file
+
+- assoc_query:
+
+  a list or a data frame with one row. See details.
+
+- output_file:
+
+  If not NULL, the name of the output image where to save the plot
+  (image type guessed from the file name).
+
+- by_allele:
+
+  group the samples by allele (an heterozygous sample would be shown
+  twice). Default: FALSE (i.e. grouped by genotype)
+
+## Value
+
+a ggplot object. Saves a file if output_file is provided.
