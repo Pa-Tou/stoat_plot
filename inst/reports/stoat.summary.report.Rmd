@@ -1,0 +1,36 @@
+---
+title: STOAT summary report
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, fig.width=10)
+```
+
+```{r}
+library(StoatPlot)
+library(ggplot2)
+
+## path to association file (~stoat.assoc.pvalues.tsv.gz)
+assoc_file = {{assoc_file}}
+
+## import association results
+assoc = import_assoc(assoc_file)
+```
+
+## Summary
+
+```{r}
+summary_stoat(assoc)
+```
+
+## QQ-plot
+
+```{r qqplot, fig.width=7, fig.height=6}
+qq_plot(assoc)
+```
+
+## Manhattan plot
+
+```{r manhplot, fig.width=15, fig.height=5}
+manhattan_plot(assoc)
+```
