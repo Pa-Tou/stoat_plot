@@ -2,27 +2,16 @@
 % Please edit documentation in R/summary_stoat.R
 \name{summary_stoat}
 \alias{summary_stoat}
-\title{Summary of Stoat snarl analysis}
+\title{Summary of STOAT's results}
 \usage{
-summary_stoat(
-  gwas_file,
-  number_top_var = 100,
-  p_column = "P",
-  p_threshold = 1e-05,
-  output = "top_variant.tsv"
-)
+summary_stoat(assoc)
 }
 \arguments{
-\item{gwas_file}{Path to the output stoat GWAS TSV file..}
-
-\item{number_top_var}{Number of top variant print in the output top variant file [string] (default : 100).}
-
-\item{p_column}{Column name to use for p-values (default: "P").}
-
-\item{p_threshold}{P-value threshold [numeric] (default : 1e-5).}
-
-\item{output}{Path/Name of the top variant output file [string] (default : "top_variant.tsv").}
+\item{assoc}{Either the data.frame imported by *import_assoc*, or the path to STOAT's output (*assoc.pvalues.tsv.gz)}
+}
+\value{
+In addition to printing the summary metrics, returns a list with the values
 }
 \description{
-Generate a summary of Stoat snarl output files.
+Print a few summary metrics from the association results
 }

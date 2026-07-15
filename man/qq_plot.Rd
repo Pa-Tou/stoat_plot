@@ -2,20 +2,18 @@
 % Please edit documentation in R/qq_plot.R
 \name{qq_plot}
 \alias{qq_plot}
-\title{Q-Q Plot for GWAS Results}
+\title{Q-Q plot of the p-values}
 \usage{
-qq_plot(gwas_file, p_column = "P", output = "qq_plot.png")
+qq_plot(assoc, output_file = NULL)
 }
 \arguments{
-\item{gwas_file}{Path to the output stoat GWAS TSV file.}
+\item{assoc}{Either the data.frame imported by *import_assoc*, or the path to STOAT's output (*assoc.pvalues.tsv.gz)}
 
-\item{p_column}{Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.}
-
-\item{output}{Filename for the output PNG plot (default: "qq_plot.png").}
+\item{output_file}{If not NULL, the name of the output image where to save the plot (image type guessed from the file name).}
 }
 \value{
-Saves a Q-Q plot image.
+a ggplot object. Saves a file too if output_file is provided.
 }
 \description{
-Generate QQ plot from STOAT GWAS results using P or P_CHI2 column.
+Generate QQ plot of the observed vs expected pvalues
 }

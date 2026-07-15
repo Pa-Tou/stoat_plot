@@ -2,36 +2,39 @@
 % Please edit documentation in R/manhattan_plot.R
 \name{manhattan_plot}
 \alias{manhattan_plot}
-\title{Manhattan Plot for GWAS Results}
+\title{Manhattan plot with all tested snarls}
 \usage{
 manhattan_plot(
-  gwas_file,
-  p_column = "P",
-  chr = NULL,
-  start = NULL,
-  end = NULL,
+  assoc,
   p_threshold = 1e-05,
-  output = "manhattan_plot.png"
+  output_file = NULL,
+  chr_order = NULL,
+  show_all_points = FALSE,
+  show_top_points = 0,
+  wrap_by_rows = 1,
+  no_plotting = FALSE
 )
 }
 \arguments{
-\item{gwas_file}{Path to the output stoat GWAS TSV file.}
-
-\item{p_column}{Column name to use for p-values (default: "P").}
-
-\item{chr}{Optional column name for chromosome (default: NULL, will try "CHR").}
-
-\item{start}{Optional column name for start positions (default: NULL, will try "START_OFFSET").}
-
-\item{end}{Optional column name for end positions (default: NULL, will try "END_OFFSET").}
+\item{assoc}{Either the data.frame imported by *import_assoc*, or the path to STOAT's output (*assoc.pvalues.tsv.gz)}
 
 \item{p_threshold}{P-value threshold for the horizontal significance line (default: 1e-5).}
 
-\item{output}{Path to save the output plot image.}
+\item{output_file}{If not NULL, the name of the output image where to save the plot (image type guessed from the file name).}
+
+\item{chr_order}{list of chromosome names in the desired order for the plot. If NULL, will try to guess.}
+
+\item{show_all_points}{should we plot all the points? Default is FALSE (cluster close-by points instead). TRUE is slower (and heavier in PDF) for large genomes.}
+
+\item{show_top_points}{how many top associations should be shown as single points? Default is 0.}
+
+\item{wrap_by_rows}{how many rows to wrap the chromosome panels. Default: 1 (no wrapping)}
+
+\item{no_plotting}{if TRUE, no graph is plotted and the ggplot/gtable is just returned. Only useful in very specific situations, with multi-row plots and where you want to handle the plotting yourself.}
 }
 \value{
-Saves a Manhattan plot to the specified file.
+A ggplot object. Saves a file if output_file is provided.
 }
 \description{
-Generate Manhattan plots from STOAT GWAS results (keeps CHR names like 'chr1', 'chrX', etc.)
+Generate a Manhattan plot showing the p-values across the pangenome.
 }

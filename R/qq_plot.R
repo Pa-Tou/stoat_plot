@@ -1,96 +1,61 @@
-#' Q-Q Plot for GWAS Results
-#' @description Generate QQ plot from STOAT GWAS results using P or P_CHI2 column.
+#' Q-Q plot of the p-values
+#' @description Generate QQ plot of the observed vs expected pvalues
 #'
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme element_text ggsave geom_abline
-#' @importFrom utils read.table
+#' @importFrom rlang .data
 #'
-#' @param gwas_file Path to the output stoat GWAS TSV file.
-#' @param p_column Column name to use for p-values (default: ""). If empty, will use "P" or "P_CHI2" if available.
-#' @param output Filename for the output PNG plot (default: "qq_plot.png").
+#' @param assoc Either the data.frame imported by *import_assoc*, or the path to STOAT's output (*assoc.pvalues.tsv.gz)
+#' @param output_file If not NULL, the name of the output image where to save the plot (image type guessed from the file name).
 #'
-#' @return Saves a Q-Q plot image.
+#' @return a ggplot object. Saves a file too if output_file is provided.
 #' @name qq_plot
 #' @export
 
-qq_plot <- function(gwas_file, 
-              p_column = "P", 
-              output = "qq_plot.png") {
+qq_plot <- function(assoc, output_file=NULL) {
 
-  ## ---------------------------
-  ## Input checks
-  ## ---------------------------
-  if (!file.exists(gwas_file)) {
-    stop("gwas_file does not exist: ", gwas_file)
+  ## potentially load the association results
+  if(is.character(assoc) && length(assoc) == 1) {
+    assoc = import_assoc(assoc)
   }
 
-  ## ---------------------------
-  ## Read GWAS file
-  ## ---------------------------
-  gwas_data <- read.table(
-    gwas_file,
-    sep = "\t",
-    header = TRUE,
-    stringsAsFactors = FALSE,
-    check.names = FALSE,
-    comment.char = ""
-  )
+  ## which column to use for the pvalue?
+  pv_col = ifelse(any(colnames(assoc) == 'P'), 'P', 'P_CHI2')
 
-  colnames(gwas_data) <- sub("^#", "", colnames(gwas_data))
+  ## Genomic inflation factor
+  chisq_stat <- median(qchisq(1 - assoc[, pv_col, TRUE], df = 1), na.rm = TRUE)
+  lambda <- chisq_stat / qchisq(0.5, df = 1)
+    
+  ## handle null pvalues
+  null_pvs = which(assoc[, pv_col] == 0)
+  if (length(null_pvs) > 0) {
+    min.pv = min(assoc[-null_pvs, pv_col])
+    min.pv = 10^(floor(log10(min.pv) - 5))
+    warning(length(null_pvs), ' p-values changed from 0 to ', min.pv)
+    assoc[null_pvs, pv_col] = min.pv
+  }
+  
+  # expected and observed -log10(P)
+  df <- tibble::tibble(expected=stats::ppoints(nrow(assoc)),
+                       observed=sort(assoc[, pv_col, TRUE]))
 
-  # Check p-value column
-  if (!(p_column %in% colnames(gwas_data))) {
-    stop(paste("Column", p_column, "not found in the gwas_data file."))
+  ## if very large, downsample pvalues above .01
+  total_variants = nrow(df)
+  if(total_variants > 1e6) {
+    n_downsampled = round(total_variants/5e4)
+    df = df[which(df$expected < .0001 | 1:nrow(df) %% n_downsampled == 0), ]
+  }
+  
+  ## plot
+  ggp <- ggplot(df, aes(x=-log10(.data$expected), y=-log10(.data$observed))) +
+    geom_point(size = 1.5) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+    labs(x = "expected -log10(P)", y = "observed -log10(P)",
+         caption = paste0("Genomic inflation factor = ", round(lambda, 3))) +
+    theme_bw()
+
+  if(!is.null(output_file)) {
+    ggsave(output_file, plot=ggp, width=6, height=6)
   }
 
-  # Convert p-values
-  pvals <- suppressWarnings(as.numeric(gwas_data[[p_column]]))
-
-  # Filter valid p-values
-  valid <- !is.na(pvals) & pvals > 0 & pvals <= 1
-  if (any(!valid)) {
-    warning("Invalid p-values detected and removed.")
-  }
-  pvals <- pvals[valid]
-  pvals <- pmax(pvals, 1e-300)
-
-  # Expected and observed -log10(P)
-  n <- length(pvals)
-  expected <- -log10((1:n) / (n + 1))
-  observed <- -log10(sort(pvals))
-
-  plot_df <- data.frame(Expected = expected, Observed = observed)
-
-  # Genomic inflation factor
-  chisq <- qchisq(1 - pvals, df = 1, lower.tail = FALSE)
-  lambda <- median(chisq, na.rm = TRUE) / qchisq(0.5, df = 1)
-
-  # Plot
-  p <- ggplot(plot_df, aes(plot_df$Expected, plot_df$Observed)) +
-    geom_point(
-      size = 1.5,
-      color = "cadetblue3",
-      alpha = 0.7
-    ) +
-    geom_abline(
-      slope = 1,
-      intercept = 0,
-      linetype = "dashed",
-      color = "red"
-    ) +
-    labs(
-      title = "QQ Plot",
-      subtitle = paste0("Genomic inflation factor = ", round(lambda, 3)),
-      x = "Expected -log10(P)",
-      y = "Observed -log10(P)"
-    ) +
-    theme_minimal(base_size = 14) +
-    theme(
-      plot.title = element_text(face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(hjust = 0.5),
-      axis.title = element_text(face = "bold"),
-      axis.text = element_text(color = "black"),
-      panel.grid.minor = element_blank()
-    )
-
-  ggsave(output, plot = p, width = 6, height = 6)
+  return(ggp)
 }
