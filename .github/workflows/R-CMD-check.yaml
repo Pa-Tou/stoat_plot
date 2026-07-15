@@ -1,4 +1,4 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples#standard-ci-workflow
 # For StoatPlot R package
 
 name: R-CMD-check
@@ -39,7 +39,6 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -48,9 +47,6 @@ jobs:
             roxygen2
             testthat
             covr
-            ggplot2
-            dplyr
-            tidyr
           needs: coverage
 
       - name: Check R package
