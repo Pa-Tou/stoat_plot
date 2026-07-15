@@ -7,18 +7,28 @@ License: GPL-3 + file LICENSE
 Depends: R (>= 3.4.4)
 Encoding: UTF-8
 LazyData: true
+LinkingTo: Rcpp
 Imports:
     ggplot2,
+    gridExtra,
     dplyr,
     tidyr,
-    tidyselect,
-    magrittr,
+    knitr,
+    tibble,
+    readr,
     utils,
     stats,
-    rlang
+    rlang,
+    Rsamtools,
+    GenomicRanges,
+    IRanges,
+    rmarkdown,
+    Rcpp
 RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0),
-    withr
+    withr,
+    car
 Config/testthat/edition: 3
 Config/dockerfile: Dockerfile
+VignetteBuilder: knitr
