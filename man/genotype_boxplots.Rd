@@ -9,7 +9,8 @@ genotype_boxplots(
   phenotype,
   assoc_query,
   output_file = NULL,
-  by_allele = FALSE
+  by_allele = FALSE,
+  show_n = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ genotype_boxplots(
 \item{output_file}{If not NULL, the name of the output image where to save the plot (image type guessed from the file name).}
 
 \item{by_allele}{group the samples by allele (an heterozygous sample would be shown twice). Default: FALSE (i.e. grouped by genotype)}
+
+\item{show_n}{should the sample size be shown at the bottom? Default is TRUE.}
 }
 \value{
 a ggplot object. Saves a file if output_file is provided.

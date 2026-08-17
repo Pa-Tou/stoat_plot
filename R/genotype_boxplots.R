@@ -11,7 +11,7 @@
 #' data.frame could be one row of the association data.frame loaded by
 #' *import_assoc*.
 #'
-#' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot labs theme_bw ggsave xlab
+#' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot labs theme_bw ggsave xlab position_jitter geom_label
 #' @importFrom rlang .data
 #'
 #' @param genotype_file path to the snarl genotype file (sorted and indexed with tabix)
@@ -19,12 +19,13 @@
 #' @param assoc_query a list or a data frame with one row. See details.
 #' @param output_file If not NULL, the name of the output image where to save the plot (image type guessed from the file name).
 #' @param by_allele group the samples by allele (an heterozygous sample would be shown twice). Default: FALSE (i.e. grouped by genotype)
+#' @param show_n should the sample size be shown at the bottom? Default is TRUE.
 #'
 #' @return a ggplot object. Saves a file if output_file is provided.
 #' @name genotype_boxplots
 #' @export
 
-genotype_boxplots <- function(genotype_file, phenotype, assoc_query, output_file=NULL, by_allele=FALSE) {
+genotype_boxplots <- function(genotype_file, phenotype, assoc_query, output_file=NULL, by_allele=FALSE, show_n=TRUE) {
   
   ## input sanity checks
   if (!file.exists(genotype_file)) {
@@ -111,14 +112,25 @@ genotype_boxplots <- function(genotype_file, phenotype, assoc_query, output_file
 
     ## make graph
     ggp = ggplot(df, aes(x=.data$allele_count, y=.data$phenotype, group=.data$allele_count)) + 
+      geom_point(alpha = 0.3, position=position_jitter(.2)) +
       geom_violin(fill = "cadetblue3", alpha = 0.3) +
-      geom_boxplot(width = 0.2, outlier.colour = "red",
+      geom_boxplot(width = 0.2, outliers=FALSE, outlier.colour = "red",
                    alpha = 0.5, fill = "darkcyan") +
       theme_bw() + labs(caption=alleles.path, title=ggp.title) +
       scale_x_continuous(breaks=0:10) +
       xlab('allele count') + 
       facet_grid(.~allele)
 
+    if(show_n) {
+      ## add sample size
+      df.n = dplyr::summarize(dplyr::group_by(df, .data$allele, .data$allele_count),
+                              allele_count_n=dplyr::n(),
+                              .groups='drop')
+      df.n$phenotype = min(df$phenotype) - .05 * diff(range(df$phenotype))
+      
+      ggp = ggp + geom_label(aes(label=.data$allele_count_n), data=df.n, vjust=1, size=3)
+    }
+    
   } else {
     ## group by genotype
     ## aggregate genotypes
@@ -130,10 +142,22 @@ genotype_boxplots <- function(genotype_file, phenotype, assoc_query, output_file
 
     ## make graph
     ggp = ggplot(df, aes(x=.data$allele, y=.data$phenotype, group=.data$allele)) + 
+      geom_point(alpha = 0.3, position=position_jitter(.05)) +
       geom_violin(fill = "cadetblue3", alpha = 0.3) +
-      geom_boxplot(width = 0.2, outlier.colour = "red",
+      geom_boxplot(width = 0.2, outliers=FALSE, outlier.colour = "red",
                    alpha = 0.5, fill = "darkcyan") +
       theme_bw() + labs(caption=alleles.path, title=ggp.title)
+
+    if(show_n) {
+      ## add sample size
+      df.n = dplyr::summarize(dplyr::group_by(df, .data$allele),
+                              allele_n=dplyr::n(),
+                              .groups='drop')
+      df.n$phenotype = min(df$phenotype) - .05 * diff(range(df$phenotype))
+      
+      ggp = ggp + geom_label(aes(label=.data$allele_n), data=df.n, vjust=1, size=3)
+    }
+
   }
   
   if(!is.null(output_file)) {
