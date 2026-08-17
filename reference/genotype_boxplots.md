@@ -20,7 +20,8 @@ genotype_boxplots(
   phenotype,
   assoc_query,
   output_file = NULL,
-  by_allele = FALSE
+  by_allele = FALSE,
+  show_n = TRUE
 )
 ```
 
@@ -48,6 +49,10 @@ genotype_boxplots(
 
   group the samples by allele (an heterozygous sample would be shown
   twice). Default: FALSE (i.e. grouped by genotype)
+
+- show_n:
+
+  should the sample size be shown at the bottom? Default is TRUE.
 
 ## Value
 
