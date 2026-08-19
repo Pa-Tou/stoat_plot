@@ -8,6 +8,7 @@ Generate a Manhattan plot showing the p-values across the pangenome.
 manhattan_plot(
   assoc,
   p_threshold = 1e-05,
+  fdr_threshold = NULL,
   output_file = NULL,
   chr_order = NULL,
   show_all_points = FALSE,
@@ -28,6 +29,11 @@ manhattan_plot(
 
   P-value threshold for the horizontal significance line (default:
   1e-5).
+
+- fdr_threshold:
+
+  FDR threshold for the horizontal significance line. Used if not NULL
+  and a P_ADJUSTED is present.
 
 - output_file:
 
@@ -81,5 +87,14 @@ assoc = import_assoc(assoc_file)
 
 # then do a Manhattan plot (recommended for large dataset).
 # Also change the P-value threshold
-manhattan_plot(assoc_file, p_threshold=1e-3)
+manhattan_plot(assoc, p_threshold=1e-3)
+
+
+
+# -------------------------------------
+
+# use a FDR threshold
+assoc$P_ADJUSTED = p.adjust(assoc$P, method='BH')
+manhattan_plot(assoc, fdr_threshold=0.01)
+
 ```
