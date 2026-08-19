@@ -8,6 +8,7 @@
 #' @param assoc Either the data.frame imported by *import_assoc*, or the path to STOAT's output (*assoc.pvalues.tsv.gz)
 #' @param output_file If not NULL, the name of the output image where to save the plot (image type guessed from the file name).
 #' @param p_threshold P-value threshold for the horizontal significance line (default: 1e-5).
+#' @param fdr_threshold FDR threshold for the horizontal significance line. Used if not NULL and a P_ADJUSTED is present.
 #' @param output_file If not NULL, the name of the output image where to save the plot (image type guessed from the file name).
 #' @param chr_order list of chromosome names in the desired order for the plot. If NULL, will try to guess.
 #' @param show_all_points should we plot all the points? Default is FALSE (cluster close-by points instead). TRUE is slower (and heavier in PDF) for large genomes.
@@ -31,10 +32,19 @@
 #' 
 #' # then do a Manhattan plot (recommended for large dataset).
 #' # Also change the P-value threshold
-#' manhattan_plot(assoc_file, p_threshold=1e-3)
+#' manhattan_plot(assoc, p_threshold=1e-3)
+#'
+#'
+#' # -------------------------------------
+#' 
+#' # use a FDR threshold
+#' assoc$P_ADJUSTED = p.adjust(assoc$P, method='BH')
+#' manhattan_plot(assoc, fdr_threshold=0.01)
+#'
 #' @export
 
-manhattan_plot <- function(assoc, p_threshold=1e-5, output_file=NULL, chr_order=NULL,
+manhattan_plot <- function(assoc, p_threshold=1e-5, fdr_threshold=NULL,
+                           output_file=NULL, chr_order=NULL,
                            show_all_points=FALSE, show_top_points=0, wrap_by_rows=1,
                            no_plotting=FALSE) {
 
@@ -55,6 +65,23 @@ manhattan_plot <- function(assoc, p_threshold=1e-5, output_file=NULL, chr_order=
     assoc[null_pvs, pv_col] = min.pv
   }
 
+  ## potentially prepare the FDR threshold
+  if(!is.null(fdr_threshold)) {
+    if (any(colnames(assoc) == 'P_ADJUSTED')) {
+      sig.idx = which(assoc$P_ADJUSTED <= fdr_threshold)
+      if(length(sig.idx) == 0){
+        warning("No P_ADJUSTED below FDR threshold: not including an horizontal line in the Manhanttan plot.")
+        p_threshold = NULL
+      } else {
+        sig.max.idx = sig.idx[which.max(assoc[, pv_col, TRUE][sig.idx])]
+        p_threshold = assoc[sig.max.idx,pv_col, TRUE]
+      }
+    } else {
+      warning("FDR threshold provided but P_ADJUSTED column missing from 'assoc'. Ignoring it.")
+      fdr_threshold = NULL
+    }
+  }
+  
   ## prepare -log10 pvalues
   assoc$logp = -log10(assoc[,pv_col, TRUE])
   
@@ -121,15 +148,27 @@ manhattan_plot <- function(assoc, p_threshold=1e-5, output_file=NULL, chr_order=
         geom_point(alpha=.3)  
     }
     ## add panels, horizontal line, legends, etc
-    ggp + facet_grid(.~.data$CHR, scales='free', space='free') +
-      scale_x_continuous(n.breaks=3) + 
-      geom_hline(yintercept=-log10(p_threshold),
-                 color="red", linetype="dashed") +
+    ggp = ggp + facet_grid(.~.data$CHR, scales='free', space='free') +
+      scale_x_continuous(n.breaks=3) +
       labs(x='position (Mbp)', y=expression(-log[10](P))) +
       theme_bw() + 
       theme(strip.text.x=element_text(angle=90),
             panel.spacing.x=grid::unit(0, 'cm'),
             legend.position='bottom')
+
+    ## add the horizontal line highlighting the pvalue threshold
+    if(!is.null(p_threshold) && p_threshold > 0 && p_threshold < 1) {
+      ggp = ggp + 
+        geom_hline(yintercept=-log10(p_threshold),
+                   color="red", linetype="dashed")
+      ## if FDR thresholding, add a caption text with the thresholds
+      if(!is.null(fdr_threshold)) {
+        ggp = ggp + labs(caption=paste0('FDR threshold: ', fdr_threshold,
+                                        ', P-value threshold: ', p_threshold))
+      }
+    }
+
+    ggp
   }
 
   ## either make multiple rows or just one
@@ -140,7 +179,8 @@ manhattan_plot <- function(assoc, p_threshold=1e-5, output_file=NULL, chr_order=
     chrs.len = dplyr::summarize(dplyr::group_by(assoc, .data$CHR),
                                 size=max(.data$START_OFFSET)/1e6)
     chrs.len$cum_size = cumsum(chrs.len$size)
-    chrs.len$row = cut(chrs.len$cum_size, breaks=seq(0, max(chrs.len$cum_size), length.out=wrap_by_rows+1))
+    chrs.len$row = cut(chrs.len$cum_size, breaks=seq(0, max(chrs.len$cum_size),
+                                                     length.out=wrap_by_rows+1))
 
     ggp.l = lapply(1:nlevels(chrs.len$row), function(row_lvl_idx) {
       cur_chrs = chrs.len$CHR[which(as.numeric(chrs.len$row) == row_lvl_idx)]      
