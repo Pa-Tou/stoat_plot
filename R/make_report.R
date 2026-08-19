@@ -30,7 +30,7 @@ make_report <- function(assoc_file, output_html_file='stoat.summary.report.html'
 
   ## compile report
   rmarkdown::render(output_rmd_file, knit_root_dir=work.dir,
-                    output_file=output_html_file)
+                    output_file=basename(output_html_file))
 
   return(output_html_file)
 }
