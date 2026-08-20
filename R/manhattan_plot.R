@@ -107,7 +107,7 @@ manhattan_plot <- function(assoc, p_threshold=1e-5, fdr_threshold=NULL,
 
   if (!show_all_points & nrow(assoc) > 1e6) {
     ## prepare an approximate location/pvalue to group points
-    max.logp = max(assoc$logp)
+    max.logp = max(assoc$logp, na.rm=TRUE)
     logp.bks = seq(-1, max.logp+1, by=min(max.logp, 10) / 100)
     logq.bks.vals = (logp.bks[-1] + logp.bks[-length(logp.bks)] ) / 2
     assoc$logp.a = logq.bks.vals[as.numeric(cut(assoc$logp, logp.bks))]

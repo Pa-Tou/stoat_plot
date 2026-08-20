@@ -36,31 +36,42 @@ summary_stoat <- function(assoc) {
   inf.lambda <- chisq_stat / qchisq(0.5, df = 1)
 
   ## compute some statistics on the pvalues
+  sum.df = tibble::tibble(Metric="Total variants", Value=nrow(assoc))
+  if(any(is.na(assoc[,pv_col]))) {
+    sum.df = rbind(
+      sum.df,
+      tibble::tibble(Metric="Total variants with non-NA PV", Value=sum(!is.na(assoc[,pv_col]))))
+  }
   sum.df = rbind(
-    tibble::tibble(Metric="Total variants", Value=sum(!is.na(assoc[,pv_col]))),
+    sum.df,
     tibble::tibble(Metric="Variant PV<0.01", Value=sum(assoc[,pv_col] < .01, na.rm=TRUE)),
     tibble::tibble(Metric="Variant adjusted PV<0.01", Value=sum(assoc$P_BH < .01, na.rm=TRUE)),
     tibble::tibble(Metric="Genomic inflation factor", Value=inf.lambda)
   )
 
-  ## assign a variant type based on PATH_LENGTHS
-  ## TODO: move to import_assoc?
-  assoc$Type = assign_type_from_lengths(assoc$ALLELE_LENGTHS)
-
-  sum.per.type = dplyr::summarize(dplyr::group_by(assoc, .data$Type),
-                                  Total=dplyr::n(),
-                                  Pv_BH_below_0.01=sum(.data$P_BH < .01))
-  sum.per.type$Type = factor(sum.per.type$Type,
-                                     levels=c("SNP", "MNP", "SV"))
-  sum.per.type = sum.per.type[order(sum.per.type$Type),]
-  
   ## print as Markdown tables
   cat('\n\n')
   cat(knitr::kable(sum.df, format.args=list(digits=3, scientific=FALSE,
                                             big.mark=',', drop0trailing=TRUE)), sep='\n')
-  cat('\n\n')
-  cat(knitr::kable(sum.per.type, format.args=list(big.mark=',')), sep='\n')
-  cat('\n\n')
 
+  ## assign a variant type based on PATH_LENGTHS
+  ## TODO: move to import_assoc?
+  sum.per.type = NULL
+  if(any(colnames(assoc) == 'ALLELE_LENGTHS')) {
+    assoc$Type = assign_type_from_lengths(assoc$ALLELE_LENGTHS)
+
+    sum.per.type = dplyr::summarize(dplyr::group_by(assoc, .data$Type),
+                                    Total=dplyr::n(),
+                                    Pv_BH_below_0.01=sum(.data$P_BH < .01))
+    sum.per.type$Type = factor(sum.per.type$Type,
+                               levels=c("SNP", "MNP", "SV"))
+    sum.per.type = sum.per.type[order(sum.per.type$Type),]
+    
+    ## print as Markdown tables
+    cat('\n\n')
+    cat(knitr::kable(sum.per.type, format.args=list(big.mark=',')), sep='\n')
+    cat('\n\n')
+  }
+  
   return(list(all=sum.df, per.type=sum.per.type))
 }

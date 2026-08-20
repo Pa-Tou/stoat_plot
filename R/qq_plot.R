@@ -27,6 +27,9 @@ qq_plot <- function(assoc, output_file=NULL) {
   ## which column to use for the pvalue?
   pv_col = ifelse(any(colnames(assoc) == 'P'), 'P', 'P_CHI2')
 
+  ## remove NA pvalues
+  assoc = assoc[which(!is.na(assoc[, pv_col, TRUE])),]
+  
   ## Genomic inflation factor
   chisq_stat <- median(qchisq(1 - assoc[, pv_col, TRUE], df = 1), na.rm = TRUE)
   lambda <- chisq_stat / qchisq(0.5, df = 1)
