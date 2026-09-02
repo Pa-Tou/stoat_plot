@@ -118,23 +118,48 @@ df = preprocess_test_table(df)
 df |> head() |> kable()
 ```
 
-| al1 |  phenotype | covarsex |  covarPC1 |
-|----:|-----------:|---------:|----------:|
-|   1 | -0.2448110 |        0 | 0.4681544 |
-|   2 | -0.0251954 |        0 | 0.3629513 |
-|   1 | -1.5837474 |        1 | 0.9353632 |
-|   2 | -1.0077583 |        0 | 0.1764886 |
-|   1 |  0.9459124 |        0 | 0.2436855 |
-|   2 |  2.6205592 |        0 | 1.6235489 |
+| sample     | al1 |  phenotype | covarsex |  covarPC1 |
+|:-----------|----:|-----------:|---------:|----------:|
+| samp_g0_0  |   1 | -0.2448110 |        0 | 0.4681544 |
+| samp_g0_1  |   2 | -0.0251954 |        0 | 0.3629513 |
+| samp_g0_10 |   1 | -1.5837474 |        1 | 0.9353632 |
+| samp_g0_11 |   2 | -1.0077583 |        0 | 0.1764886 |
+| samp_g0_12 |   1 |  0.9459124 |        0 | 0.2436855 |
+| samp_g0_13 |   2 |  2.6205592 |        0 | 1.6235489 |
 
 Now the table only contains:
 
 - a `phenotype` variable
 - one or several *allele* variables prefixed by `al`
 - one or several *covariables* prefixed by `covar`
+- potentially, a new covariable `total_allele_count` to control for the
+  effect of the parent snarl (to be used like a covariable). See example
+  below.
 
 In STOAT, we fit a model and test if any of the coefficients for the
 *allele* variables are different from 0.
+
+## Example of a nested snarl
+
+If a snarl is nested, a new covariable names *total_allele_count* is
+added by `preprocess_test_table` to control for the effect of the parent
+snarl. This new variables should be used like a covariable.
+
+``` r
+
+df = combine_chunk_phenotype_covars(chunk.l[[34]]$GT, pheno, covars)
+df = preprocess_test_table(df)
+df |> head() |> kable()
+```
+
+| sample     | al1 |  phenotype | covarsex |  covarPC1 | total_allele_count |
+|:-----------|----:|-----------:|---------:|----------:|-------------------:|
+| samp_g0_0  |   0 | -0.2448110 |        0 | 0.4681544 |                  1 |
+| samp_g0_1  |   1 | -0.0251954 |        0 | 0.3629513 |                  2 |
+| samp_g0_10 |   0 | -1.5837474 |        1 | 0.9353632 |                  1 |
+| samp_g0_11 |   2 | -1.0077583 |        0 | 0.1764886 |                  2 |
+| samp_g0_12 |   1 |  0.9459124 |        0 | 0.2436855 |                  2 |
+| samp_g0_13 |   1 |  2.6205592 |        0 | 1.6235489 |                  2 |
 
 ## Compute p-values using linear regression
 
@@ -148,6 +173,9 @@ pv.df = lapply(chunk.l, function(snarl_info) {
   df = combine_chunk_phenotype_covars(snarl_info$GT, pheno, covars)
   df = preprocess_test_table(df)
 
+  ## remove the sample name column
+  df$sample = NULL
+  
   ## run the regression
   model = lm(phenotype ~ ., data=df)
   ## null hypothesis is all allele coeffs are 0

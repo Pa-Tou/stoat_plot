@@ -5,7 +5,7 @@ Read the TSV (potentially gzipped) file produced by STOAT and load it.
 ## Usage
 
 ``` r
-import_assoc(assoc_file)
+import_assoc(assoc_file, all_columns = FALSE)
 ```
 
 ## Arguments
@@ -13,6 +13,10 @@ import_assoc(assoc_file)
 - assoc_file:
 
   Path to STOAT's output (\*assoc.pvalues.tsv.gz)
+
+- all_columns:
+
+  Should all the columns be returned? Default: FALSE
 
 ## Value
 

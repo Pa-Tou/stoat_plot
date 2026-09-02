@@ -59,7 +59,7 @@
                         <h4 data-toc-skip class="author">Jean
 Monlong</h4>
             
-            <h4 data-toc-skip class="date">2026-08-20</h4>
+            <h4 data-toc-skip class="date">2026-09-02</h4>
       
 
       <div class="d-none name"><code>using-custom-test.Rmd</code></div>
@@ -242,6 +242,7 @@ used by STOAT.</p>
 <span><span class="va">df</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
+<th align="left">sample</th>
 <th align="right">al1</th>
 <th align="right">phenotype</th>
 <th align="right">covarsex</th>
@@ -249,36 +250,42 @@ used by STOAT.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td align="left">samp_g0_0</td>
 <td align="right">1</td>
 <td align="right">-0.2448110</td>
 <td align="right">0</td>
 <td align="right">0.4681544</td>
 </tr>
 <tr class="even">
+<td align="left">samp_g0_1</td>
 <td align="right">2</td>
 <td align="right">-0.0251954</td>
 <td align="right">0</td>
 <td align="right">0.3629513</td>
 </tr>
 <tr class="odd">
+<td align="left">samp_g0_10</td>
 <td align="right">1</td>
 <td align="right">-1.5837474</td>
 <td align="right">1</td>
 <td align="right">0.9353632</td>
 </tr>
 <tr class="even">
+<td align="left">samp_g0_11</td>
 <td align="right">2</td>
 <td align="right">-1.0077583</td>
 <td align="right">0</td>
 <td align="right">0.1764886</td>
 </tr>
 <tr class="odd">
+<td align="left">samp_g0_12</td>
 <td align="right">1</td>
 <td align="right">0.9459124</td>
 <td align="right">0</td>
 <td align="right">0.2436855</td>
 </tr>
 <tr class="even">
+<td align="left">samp_g0_13</td>
 <td align="right">2</td>
 <td align="right">2.6205592</td>
 <td align="right">0</td>
@@ -295,21 +302,99 @@ used by STOAT.</p>
 <li>one or several <em>covariables</em> prefixed by
 <code>covar</code>
 </li>
+<li>potentially, a new covariable <code>total_allele_count</code> to
+control for the effect of the parent snarl (to be used like a
+covariable). See example below.</li>
 </ul>
 <p>In STOAT, we fit a model and test if any of the coefficients for the
 <em>allele</em> variables are different from 0.</p>
+</div>
+<div class="section level2">
+<h2 id="example-of-a-nested-snarl">Example of a nested snarl<a class="anchor" aria-label="anchor" href="#example-of-a-nested-snarl"></a>
+</h2>
+<p>If a snarl is nested, a new covariable names
+<em>total_allele_count</em> is added by
+<code>preprocess_test_table</code> to control for the effect of the
+parent snarl. This new variables should be used like a covariable.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="../reference/combine_chunk_phenotype_covars.html">combine_chunk_phenotype_covars</a></span><span class="op">(</span><span class="va">chunk.l</span><span class="op">[[</span><span class="fl">34</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GT</span>, <span class="va">pheno</span>, <span class="va">covars</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="../reference/preprocess_test_table.html">preprocess_test_table</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left">sample</th>
+<th align="right">al1</th>
+<th align="right">phenotype</th>
+<th align="right">covarsex</th>
+<th align="right">covarPC1</th>
+<th align="right">total_allele_count</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">samp_g0_0</td>
+<td align="right">0</td>
+<td align="right">-0.2448110</td>
+<td align="right">0</td>
+<td align="right">0.4681544</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">samp_g0_1</td>
+<td align="right">1</td>
+<td align="right">-0.0251954</td>
+<td align="right">0</td>
+<td align="right">0.3629513</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">samp_g0_10</td>
+<td align="right">0</td>
+<td align="right">-1.5837474</td>
+<td align="right">1</td>
+<td align="right">0.9353632</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">samp_g0_11</td>
+<td align="right">2</td>
+<td align="right">-1.0077583</td>
+<td align="right">0</td>
+<td align="right">0.1764886</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">samp_g0_12</td>
+<td align="right">1</td>
+<td align="right">0.9459124</td>
+<td align="right">0</td>
+<td align="right">0.2436855</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">samp_g0_13</td>
+<td align="right">1</td>
+<td align="right">2.6205592</td>
+<td align="right">0</td>
+<td align="right">1.6235489</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level2">
 <h2 id="compute-p-values-using-linear-regression">Compute p-values using linear regression<a class="anchor" aria-label="anchor" href="#compute-p-values-using-linear-regression"></a>
 </h2>
 <p>For example, let’s compute a pvalue by fitting a linear regression
 model for each snarl.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv.df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">chunk.l</span>, <span class="kw">function</span><span class="op">(</span><span class="va">snarl_info</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co">## combine allele count with the phenotype</span></span>
 <span>  <span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="../reference/combine_chunk_phenotype_covars.html">combine_chunk_phenotype_covars</a></span><span class="op">(</span><span class="va">snarl_info</span><span class="op">$</span><span class="va">GT</span>, <span class="va">pheno</span>, <span class="va">covars</span><span class="op">)</span></span>
 <span>  <span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="../reference/preprocess_test_table.html">preprocess_test_table</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
 <span></span>
+<span>  <span class="co">## remove the sample name column</span></span>
+<span>  <span class="va">df</span><span class="op">$</span><span class="va">sample</span> <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  </span>
 <span>  <span class="co">## run the regression</span></span>
 <span>  <span class="va">model</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">phenotype</span> <span class="op">~</span> <span class="va">.</span>, data<span class="op">=</span><span class="va">df</span><span class="op">)</span></span>
 <span>  <span class="co">## null hypothesis is all allele coeffs are 0</span></span>

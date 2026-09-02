@@ -112,6 +112,26 @@ data.frame could be one row of the association data.frame loaded by
     <p>a ggplot object. Saves a file if output_file is provided.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## path to test files</span></span></span>
+<span class="r-in"><span><span class="va">gt_fn</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/snarl_genotypes.sorted.tsv.gz'</span>, package<span class="op">=</span><span class="st">'StoatPlot'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pheno_fn</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/phenotype.quantitative.tsv'</span>, package<span class="op">=</span><span class="st">'StoatPlot'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">assoc_fn</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/stoat.quantitative.assoc.pvalues.tsv.gz'</span>, package<span class="op">=</span><span class="st">'StoatPlot'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## get variants with PV&lt;1e-5</span></span></span>
+<span class="r-in"><span><span class="va">assoc</span> <span class="op">=</span> <span class="fu"><a href="import_assoc.html">import_assoc</a></span><span class="op">(</span><span class="va">assoc_fn</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">assoc.sig</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">assoc</span>, <span class="va">P</span><span class="op">&lt;</span><span class="fl">1e-5</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## boxplot for one variant with samples grouped by genotype</span></span></span>
+<span class="r-in"><span><span class="fu">genotype_boxplots</span><span class="op">(</span><span class="va">gt_fn</span>, <span class="va">pheno_fn</span>, <span class="va">assoc.sig</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="genotype_boxplots-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## boxplot for one variant with samples grouped by allele</span></span></span>
+<span class="r-in"><span><span class="fu">genotype_boxplots</span><span class="op">(</span><span class="va">gt_fn</span>, <span class="va">pheno_fn</span>, <span class="va">assoc.sig</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, by_allele<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="genotype_boxplots-2.png" alt="" width="700" height="433"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
