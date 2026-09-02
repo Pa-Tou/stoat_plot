@@ -6,6 +6,7 @@
 <!-- Uncomment when we release
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Pa-Tou/stoat_plot)](https://github.com/Pa-Tou/stoat_plot/releases/latest) 
 -->
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fpa-tou.github.io%2Fstoat_plot%2F)](https://pa-tou.github.io/stoat_plot/)
 
 ## Overview
 
@@ -45,7 +46,7 @@ library(StoatPlot)
 BiocManager::install("Pa-Tou/stoat_plot")
 ```
 
-> If you are having problem, another option is to follow the [`install.R`](install.R) script (used to install the package in the Docker container). This script is supposed to be run from the root of this folder, so you would have clone the repo first.
+> If you are having problem, another option is to follow the [`install.R`](https://github.com/Pa-Tou/stoat_plot/blob/main/install.R) script (used to install the package in the Docker container). This script is supposed to be run from the root of this folder, so you would have to clone the repo first.
 
 ## Functions
 

@@ -23,6 +23,21 @@
 #'
 #' @return a ggplot object. Saves a file if output_file is provided.
 #' @name genotype_boxplots
+#' @examples
+#' ## path to test files
+#' gt_fn = system.file('extdata/snarl_genotypes.sorted.tsv.gz', package='StoatPlot')
+#' pheno_fn = system.file('extdata/phenotype.quantitative.tsv', package='StoatPlot')
+#' assoc_fn = system.file('extdata/stoat.quantitative.assoc.pvalues.tsv.gz', package='StoatPlot')
+#'
+#' ## get variants with PV<1e-5
+#' assoc = import_assoc(assoc_fn)
+#' assoc.sig = subset(assoc, P<1e-5)
+#'
+#' ## boxplot for one variant with samples grouped by genotype
+#' genotype_boxplots(gt_fn, pheno_fn, assoc.sig[1,])
+#'
+#' ## boxplot for one variant with samples grouped by allele
+#' genotype_boxplots(gt_fn, pheno_fn, assoc.sig[1,], by_allele=TRUE)
 #' @export
 
 genotype_boxplots <- function(genotype_file, phenotype, assoc_query, output_file=NULL, by_allele=FALSE, show_n=TRUE) {

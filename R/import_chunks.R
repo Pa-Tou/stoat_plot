@@ -88,6 +88,16 @@ import_genotype_chunk <- function(genotype_file, chrom, start_offset, end_offset
          GT=df)
   })
 
+  ## don't return NULL elements (snarls with one allele)
+  res.null = sapply(res.ll, is.null)
+  if(length(res.ll) == 0 || all(res.null)) {
+    # if all snarls are NULL or the list was empty
+    return(list())
+  }
+  if(any(res.null)) {
+    res.ll = res.ll[which(!res.null)]
+  }
+  
   return(res.ll)
 }
 
@@ -170,13 +180,8 @@ combine_chunk_phenotype_covars <- function(snarl_ac, phenotype, covariables=NULL
 ##' @return a data.frame ready for a test
 ##' @export
 preprocess_test_table <- function(test_table) {
-  ## remove sample names, if present
-  if (any(colnames(test_table) == 'sample')) {
-    test_table$sample = NULL
-  }
-
-  ## all variable names except the phenotype
-  var.names = setdiff(colnames(test_table), 'phenotype')
+  ## all variable names except the phenotype and sample IDs
+  var.names = setdiff(colnames(test_table), c('sample', 'phenotype'))
 
   ## find constant columns
   col.var = sapply(var.names, function(varn) {

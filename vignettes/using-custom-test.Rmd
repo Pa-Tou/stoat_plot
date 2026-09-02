@@ -89,8 +89,20 @@ Now the table only contains:
 - a `phenotype` variable
 - one or several *allele* variables prefixed by `al`
 - one or several *covariables* prefixed by `covar`
+- potentially, a new covariable `total_allele_count` to control for the effect of the parent snarl (to be used like a covariable). See example below.
 
 In STOAT, we fit a model and test if any of the coefficients for the *allele* variables are different from 0.
+
+## Example of a nested snarl
+
+If a snarl is nested, a new covariable names *total_allele_count* is added by `preprocess_test_table` to control for the effect of the parent snarl.
+This new variables should be used like a covariable.
+
+```{r}
+df = combine_chunk_phenotype_covars(chunk.l[[34]]$GT, pheno, covars)
+df = preprocess_test_table(df)
+df |> head() |> kable()
+```
 
 ## Compute p-values using linear regression
 
@@ -102,6 +114,9 @@ pv.df = lapply(chunk.l, function(snarl_info) {
   df = combine_chunk_phenotype_covars(snarl_info$GT, pheno, covars)
   df = preprocess_test_table(df)
 
+  ## remove the sample name column
+  df$sample = NULL
+  
   ## run the regression
   model = lm(phenotype ~ ., data=df)
   ## null hypothesis is all allele coeffs are 0
