@@ -2,12 +2,13 @@
 #'
 #' @description Read the TSV (potentially gzipped) file produced by STOAT and load it.
 #' @param assoc_file Path to STOAT's output (*assoc.pvalues.tsv.gz)
+#' @param all_columns Should all the columns be returned? Default: FALSE
 #'
 #' @return A polished data.frame with a subset of the TSV file.
 #' @name import_assoc
 #' @export
 
-import_assoc <- function(assoc_file) {
+import_assoc <- function(assoc_file, all_columns=FALSE) {
 
   ## don't load all columns (add more if/when we need them)
   ## all_cols = c('#CHR', 'START_OFFSET', 'END_OFFSET',
@@ -26,6 +27,11 @@ import_assoc <- function(assoc_file) {
                'GENE'='character',
                'P'='numeric',
                'ALLELE_COUNT'='character')
+  if (all_columns) {
+    sel_cols = c(sel_cols,
+                 'END_OFFSET'='numeric', 
+                 'DEPTH'='numeric')
+  }
 
   ## read a few rows to check the header
   df = readr::read_delim(assoc_file, n_max=3, progress=FALSE, show_col_types=FALSE)

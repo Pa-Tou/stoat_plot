@@ -4,10 +4,12 @@
 \alias{import_assoc}
 \title{Import association results from STOAT}
 \usage{
-import_assoc(assoc_file)
+import_assoc(assoc_file, all_columns = FALSE)
 }
 \arguments{
 \item{assoc_file}{Path to STOAT's output (*assoc.pvalues.tsv.gz)}
+
+\item{all_columns}{Should all the columns be returned? Default: FALSE}
 }
 \value{
 A polished data.frame with a subset of the TSV file.

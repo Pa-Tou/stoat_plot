@@ -29,7 +29,9 @@ summary_stoat <- function(assoc) {
   pv_col = ifelse(any(colnames(assoc) == 'P'), 'P', 'P_CHI2')
   
   ## correct for multiple test correction
-  assoc$P_BH = p.adjust(assoc[,pv_col, TRUE], method = "BH")
+  if(all(colnames(assoc) != 'P_BH')){
+    assoc$P_BH = p.adjust(assoc[,pv_col, TRUE], method = "BH")
+  }
 
   ## Genomic inflation factor
   chisq_stat <- median(qchisq(1 - assoc[,pv_col, TRUE], df = 1), na.rm = TRUE)
@@ -45,7 +47,17 @@ summary_stoat <- function(assoc) {
   sum.df = rbind(
     sum.df,
     tibble::tibble(Metric="Variant PV<0.01", Value=sum(assoc[,pv_col] < .01, na.rm=TRUE)),
-    tibble::tibble(Metric="Variant adjusted PV<0.01", Value=sum(assoc$P_BH < .01, na.rm=TRUE)),
+    tibble::tibble(Metric="Variant adjusted PV<0.01", Value=sum(assoc$P_BH < .01, na.rm=TRUE))
+  )
+  if(any(colnames(assoc) == 'GENE')) {
+    sum.df = rbind(
+      sum.df,
+      tibble::tibble(Metric="Genes PV<0.01", Value=length(unique(assoc$GENE[which(assoc[,pv_col] < .01)]))),
+      tibble::tibble(Metric="Genes adjusted PV<0.01", Value=length(unique(assoc$GENE[which(assoc$P_BH < .01)])))
+    )
+  }
+  sum.df = rbind(
+    sum.df,
     tibble::tibble(Metric="Genomic inflation factor", Value=inf.lambda)
   )
 
